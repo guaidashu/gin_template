@@ -26,6 +26,10 @@ func PUT(pattern string, function gin.HandlerFunc) {
 	Router.PUT(pattern, function)
 }
 
+func Group(pattern string, function ...gin.HandlerFunc) *gin.RouterGroup {
+	return Router.Group(pattern, function...)
+}
+
 func DELETE(pattern string, function gin.HandlerFunc) {
 	Router.DELETE(pattern, function)
 }
