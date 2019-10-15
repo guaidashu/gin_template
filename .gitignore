@@ -1,0 +1,11 @@
+.vscode
+.idea
+main
+app/config/config_dev.yml
+logs
+test
+gin_template
+main
+.DS_Store
+**/.DS_Store
+go.sum

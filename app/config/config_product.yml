@@ -1,0 +1,42 @@
+mysql:
+  database:
+    "helper_go"
+  dbhost:
+    "127.0.0.1"
+  dbusername:
+    "root"
+  dbpassword:
+    "root"
+  dbport:
+    "3306"
+  dbpoolsize:
+    10
+redis:
+  redishost:
+    "127.0.0.1"
+  redisport:
+    "6379"
+  redispassword:
+    ""
+postgresql:
+  database:
+    "postgres"
+  port:
+    "5432"
+  host:
+    "127.0.0.1"
+  username:
+    "postgres"
+  password:
+    ""
+  poolsize:
+    10
+app:
+  runaddress:
+    "127.0.0.1"
+  runport:
+    "8084"
+  logdir:
+    "logs"
+  debug:
+    "true"
