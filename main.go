@@ -5,9 +5,9 @@
 package main
 
 import (
-	"gin_template_origin/app/ginServer"
-	_ "gin_template_origin/app/init"
-	_ "gin_template_origin/app/router"
+	"gin_template/app/ginServer"
+	_ "gin_template/app/init"
+	_ "gin_template/app/router"
 )
 
 func main() {
