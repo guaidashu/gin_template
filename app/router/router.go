@@ -12,7 +12,10 @@ import (
 
 func init() {
 	fmt.Println("开始初始化router")
-	ginServer.GET("/test", controller.Test)
+	test := ginServer.Group("/test")
+	{
+		test.GET("/", controller.Test)
+	}
 	ginServer.GET("/", controller.Index)
 	ginServer.GET("/index", controller.Index)
 	ginServer.GET("/init_table", controller.InitTables)
