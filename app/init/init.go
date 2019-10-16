@@ -34,5 +34,5 @@ func init() {
 		libs.Logger.Info(fmt.Sprintf("init db failed, error: %v", err))
 	}
 	// 自动建表， 第一次运行了之后可以注释掉，或者通过 router里配置的init_table 可视化访问来创建
-	models.CreateTable()
+	// models.CreateTable()
 }

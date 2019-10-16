@@ -5,6 +5,7 @@
 package ginServer
 
 import (
+	"fmt"
 	"gin_template/app/config"
 	"github.com/gin-gonic/gin"
 )
@@ -18,8 +19,10 @@ func init() {
 }
 
 func Run(addr ...string) {
-	if len(addr) < 1 {
-		addr = append(addr, config.Config.App.RunAddress+":"+config.Config.App.RunPort)
+	if len(addr) > 0 || config.Config.App.RunAddress == "" {
+		_ = Router.Run(addr...)
+		return
 	}
-	_ = Router.Run(addr...)
+	address := fmt.Sprintf("%v:%v", config.Config.App.RunAddress, config.Config.App.RunPort)
+	_ = Router.Run(address)
 }

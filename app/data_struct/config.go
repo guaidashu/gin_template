@@ -21,10 +21,10 @@ type MysqlConf struct {
 }
 
 type AppConf struct {
-	LogDir     string `json:"log_dir"`
-	RunAddress string `json:"run_address"`
-	RunPort    string `json:"run_port"`
-	DEBUG      bool   `json:"debug"`
+	LogDir     string      `json:"log_dir"`
+	RunAddress string      `json:"run_address"`
+	RunPort    interface{} `json:"run_port"`
+	DEBUG      bool        `json:"debug"`
 }
 
 type RedisConf struct {
