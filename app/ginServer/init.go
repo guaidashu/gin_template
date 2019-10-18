@@ -28,11 +28,12 @@ func init() {
 }
 
 func Run(addr ...string) {
+	var address string
 	if len(addr) > 0 || config.Config.App.RunAddress == "" {
-		_ = Router.Run(addr...)
-		return
+		address = resolveAddress(addr)
+	} else {
+		address = fmt.Sprintf("%v:%v", config.Config.App.RunAddress, config.Config.App.RunPort)
 	}
-	address := fmt.Sprintf("%v:%v", config.Config.App.RunAddress, config.Config.App.RunPort)
 	err := startServer(address)
 	if err != nil {
 		libs.DebugPrint(libs.GetErrorString(err))
@@ -70,6 +71,22 @@ func startServer(address string) error {
 	}
 
 	return err
+}
+
+func resolveAddress(addr []string) string {
+	switch len(addr) {
+	case 0:
+		if port := os.Getenv("PORT"); port != "" {
+			libs.DebugPrint("Environment variable PORT=\"%s\"", port)
+			return ":" + port
+		}
+		libs.DebugPrint("Environment variable PORT is undefined. Using port :8080 by default")
+		return ":8080"
+	case 1:
+		return addr[0]
+	default:
+		panic("too much parameters")
+	}
 }
 
 // 实现 context.Context 接口
