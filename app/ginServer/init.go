@@ -36,7 +36,7 @@ func Run(addr ...string) {
 	}
 	err := startServer(address)
 	if err != nil {
-		libs.DebugPrint(libs.GetErrorString(err))
+		libs.DebugPrint(err.Error())
 	}
 }
 
@@ -54,7 +54,7 @@ func startServer(address string) error {
 		<-c
 
 		//ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		ctx, cancel := context.WithTimeout(&ShutdownContext{}, 3*time.Second)
+		ctx, cancel := context.WithTimeout(&ShutdownContext{Chan: nil}, 3*time.Second)
 		defer cancel()
 
 		if err := server.Shutdown(ctx); err != nil {
@@ -107,7 +107,7 @@ func (s *ShutdownContext) Deadline() (deadline time.Time, ok bool) {
 }
 
 func (s *ShutdownContext) Done() <-chan struct{} {
-	return nil
+	return s.Chan
 }
 
 func (s *ShutdownContext) Err() error {

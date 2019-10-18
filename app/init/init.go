@@ -10,15 +10,17 @@ import (
 	"gin_template/app/libs"
 	"gin_template/app/models"
 	"gin_template/app/redis"
+	"log"
 )
 
 func init() {
 	// 初始化日志
-	fmt.Println("======= 初始化日志系统 ======")
 	err, _ := libs.InitLogger()
 	if err != nil {
-		fmt.Println(fmt.Sprintf("init logger failed, error: %v", err))
+		log.Println(fmt.Sprintf("init logger failed, error: %v", err))
+		return
 	}
+	libs.Logger.Info("======= 初始化日志系统 ======")
 	// 初始化redis
 	libs.Logger.Info("====== 初始化redis系统 ======")
 	redis.InitRedis()
