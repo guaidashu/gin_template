@@ -7,6 +7,8 @@ package models
 import (
 	"fmt"
 	"gin_template/app/config"
+	"gin_template/app/libs"
+	"gin_template/app/redis"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -72,4 +74,28 @@ func getDB() (*gorm.DB, error) {
 func CreateTable() {
 	user := new(UserModel)
 	user.CreateTable()
+}
+
+func CloseDB() {
+	var err error
+	libs.Logger.Info("Close Postgresql.")
+	if PDB != nil {
+		if err = PDB.Close(); err != nil {
+			libs.Logger.Error("Close Postgresql failed, error: %v", err)
+		}
+	}
+
+	libs.Logger.Info("Close Mysql")
+	if GDB != nil {
+		if err = GDB.Close(); err != nil {
+			libs.Logger.Error("Close Mysql failed, error: %v", err)
+		}
+	}
+
+	libs.Logger.Info("Close redis")
+	if redis.Redis != nil {
+		if err = redis.Redis.Close(); err != nil {
+			libs.Logger.Info("Close redis failed, error: %v", err)
+		}
+	}
 }
