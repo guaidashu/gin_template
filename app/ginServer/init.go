@@ -49,10 +49,12 @@ func Run(addr ...string) {
 
 func startServer(address string, processed chan struct{}) error {
 	var err error
+
 	server := &http.Server{
 		Addr:    address,
 		Handler: Router,
 	}
+
 	libs.DebugPrint("Listening and serving HTTP on %s\n", address)
 
 	go func() {
@@ -74,6 +76,7 @@ func startServer(address string, processed chan struct{}) error {
 		// 会阻塞在此， 然后关闭之后才会触发err 接收error， 并执行后续操作， 若有问题希望能指出
 		close(processed)
 	}()
+
 	err = server.ListenAndServe()
 	// 关闭数据库
 	models.CloseDB()
