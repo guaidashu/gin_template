@@ -29,6 +29,7 @@ func init() {
 
 func Run(addr ...string) {
 	var address string
+
 	if len(addr) > 0 || config.Config.App.RunAddress == "" {
 		address = resolveAddress(addr)
 	} else {
