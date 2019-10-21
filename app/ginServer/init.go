@@ -34,13 +34,19 @@ func Run(addr ...string) {
 	} else {
 		address = fmt.Sprintf("%v:%v", config.Config.App.RunAddress, config.Config.App.RunPort)
 	}
-	err := startServer(address)
+
+	processed := make(chan struct{}, 1)
+
+	err := startServer(address, processed)
+
 	if err != nil {
 		libs.DebugPrint(err.Error())
 	}
+
+	<-processed
 }
 
-func startServer(address string) error {
+func startServer(address string, processed chan struct{}) error {
 	var err error
 	server := &http.Server{
 		Addr:    address,
@@ -61,6 +67,11 @@ func startServer(address string) error {
 			log.Fatalf("server shutdown failed, err: %v\n", libs.NewReportError(err))
 		}
 		libs.DebugPrint("server gracefully")
+
+		// 这里的processed  是防止在还未关闭完成的情况下，主程序就down掉了，因为文档说过，关闭途中主程序是不能结束的
+		// 但是疑惑的是，我不用 processed来阻塞也不会出错， 目前怀疑是 因为通过子函数来调用，server.ListenAndServe()
+		// 会阻塞在此， 然后关闭之后才会触发err 接收error， 并执行后续操作， 若有问题希望能指出
+		close(processed)
 	}()
 	err = server.ListenAndServe()
 	// 关闭数据库
