@@ -79,29 +79,29 @@ func CreateTable() {
 
 func CloseDB() {
 	var err error
-	libs.Logger.Info("Close Postgresql.")
 	if PDB != nil {
+		libs.Logger.Info("Close Postgresql.")
 		if err = PDB.Close(); err != nil {
 			libs.Logger.Error("Close Postgresql failed, error: %v", err)
 		}
 	}
 
-	libs.Logger.Info("Close Mysql")
 	if GDB != nil {
+		libs.Logger.Info("Close Mysql")
 		if err = GDB.Close(); err != nil {
 			libs.Logger.Error("Close Mysql failed, error: %v", err)
 		}
 	}
 
-	libs.Logger.Info("Close redis")
 	if redis.Redis != nil {
+		libs.Logger.Info("Close redis")
 		if err = redis.Redis.Close(); err != nil {
 			libs.Logger.Info("Close redis failed, error: %v", err)
 		}
 	}
 
-	libs.Logger.Info("Close Mongodb")
 	if mongodb.MDB != nil {
+		libs.Logger.Info("Close Mongodb")
 		if err = mongodb.MDB.Close(); err != nil {
 			libs.Logger.Info("Close Mongodb failed, error: %v", err)
 		}
