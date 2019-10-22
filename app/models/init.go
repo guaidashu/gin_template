@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"gin_template/app/config"
 	"gin_template/app/libs"
+	"gin_template/app/mongodb"
 	"gin_template/app/redis"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -96,6 +97,13 @@ func CloseDB() {
 	if redis.Redis != nil {
 		if err = redis.Redis.Close(); err != nil {
 			libs.Logger.Info("Close redis failed, error: %v", err)
+		}
+	}
+
+	libs.Logger.Info("Close Mongodb")
+	if mongodb.MDB != nil {
+		if err = mongodb.MDB.Close(); err != nil {
+			libs.Logger.Info("Close Mongodb failed, error: %v", err)
 		}
 	}
 }
