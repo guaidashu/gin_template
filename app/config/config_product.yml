@@ -52,4 +52,4 @@ app:
   logdir:
     "logs"
   debug:
-    "true"
+    true
