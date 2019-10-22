@@ -9,6 +9,7 @@ type Config struct {
 	PostGreSql PostGreSql
 	App        AppConf
 	Redis      RedisConf
+	Mongodb    MongodbConf
 }
 
 type MysqlConf struct {
@@ -40,4 +41,13 @@ type PostGreSql struct {
 	Username string `json:"username"`
 	Port     string `json:"port"`
 	PoolSize int    `json:"pool_size"`
+}
+
+type MongodbConf struct {
+	Database string      `json:"database"`
+	Host     string      `json:"host"`
+	Password string      `json:"password"`
+	Username string      `json:"username"`
+	Port     interface{} `json:"port"`
+	PoolSize int         `json:"pool_size"`
 }

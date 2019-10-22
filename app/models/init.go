@@ -24,7 +24,7 @@ func InitDB() error {
 	}
 	GDB = db
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
-		return "doratv_" + defaultTableName
+		return "table_" + defaultTableName
 	}
 	return nil
 }
