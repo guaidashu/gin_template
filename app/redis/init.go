@@ -11,17 +11,18 @@ import (
 
 var Redis *redis_tool.RedisConn
 
-func InitRedis() {
-	Redis = getConnect()
+func InitRedis() (err error) {
+	Redis, err = getConnect()
+	return
 }
 
-func getConnect() *redis_tool.RedisConn {
+func getConnect() (*redis_tool.RedisConn, error) {
 	rds := &redis_tool.RedisConn{}
 	conf := &redis_tool.RedisConfig{
 		Host:     config.Config.Redis.RedisHost,
 		Port:     config.Config.Redis.RedisPort,
 		Password: config.Config.Redis.RedisPassword,
 	}
-	rds.Init(conf)
-	return rds
+	err := rds.Init(conf)
+	return rds, err
 }
