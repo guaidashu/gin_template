@@ -74,7 +74,10 @@ func getDB() (*gorm.DB, error) {
 
 func CreateTable() {
 	user := new(UserModel)
-	user.CreateTable()
+	err := user.CreateTable()
+	if err != nil {
+		libs.Logger.Error("create db error.")
+	}
 }
 
 func CloseDB() {

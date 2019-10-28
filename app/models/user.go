@@ -15,9 +15,8 @@ type UserModel struct {
 
 func (u *UserModel) GetDB() *gorm.DB {
 	db := GDB.Table(u.TableName())
-	if db == nil {
-		u.CreateTable()
-		return GDB.Table(u.TableName()).Where("status = ?", 1)
+	if db != nil {
+		return db.Where("status = ?", 1)
 	}
 	return db
 }
@@ -26,8 +25,15 @@ func (u *UserModel) TableName() string {
 	return "user"
 }
 
-func (u *UserModel) CreateTable() {
-	u.GetDB().Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(u)
+func (u *UserModel) CreateTable() error {
+	db := u.GetDB()
+	if !db.HasTable(u.TableName()) {
+		err := db.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(u).Error
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (u *UserModel) Create() {
