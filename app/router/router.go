@@ -8,10 +8,16 @@ import (
 	"fmt"
 	"gin_template/app/controller"
 	"gin_template/app/ginServer"
+	"net/http"
 )
 
 func init() {
 	fmt.Println("开始初始化router")
+
+	ginServer.LoadHTMLGlob("app/views/**/*")
+
+	ginServer.StaticFS("/asset", http.Dir("app/asset"))
+
 	test := ginServer.Group("/test")
 	{
 		test.GET("/", controller.Test)
