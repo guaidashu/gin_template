@@ -62,7 +62,7 @@ func startServer(address string, processed chan struct{}) error {
 		signal.Notify(c, os.Interrupt)
 		<-c
 
-		//ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		// ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		ctx, cancel := context.WithTimeout(&ShutdownContext{Chan: nil}, 3*time.Second)
 		defer cancel()
 

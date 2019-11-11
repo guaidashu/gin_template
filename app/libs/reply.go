@@ -5,13 +5,18 @@
 package libs
 
 import (
-	"gin_template/app/data_struct"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
+type Reply struct {
+	Code int         `json:"code"`
+	Msg  string      `json:"msg"`
+	Data interface{} `json:"data"`
+}
+
 func Success(ctx *gin.Context, data interface{}) {
-	r := &data_struct.Reply{
+	r := &Reply{
 		Code: 0,
 		Msg:  "",
 		Data: data,
@@ -20,7 +25,7 @@ func Success(ctx *gin.Context, data interface{}) {
 }
 
 func Error(ctx *gin.Context, msg string) {
-	r := &data_struct.Reply{
+	r := &Reply{
 		Code: 1,
 		Msg:  msg,
 		Data: "",

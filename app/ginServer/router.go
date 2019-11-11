@@ -11,9 +11,9 @@ import (
 
 // If you want to use AutoRouter, please read README.md.
 
-//func AutoRouter(controller interface{}) {
+// func AutoRouter(controller interface{}) {
 //	libs.AutoRoute(Router, controller)
-//}
+// }
 
 func GET(pattern string, function gin.HandlerFunc) {
 	Router.GET(pattern, function)

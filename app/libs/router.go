@@ -12,25 +12,25 @@ var (
 	HTTPMETHOD = map[string]bool{
 		"GET":  true,
 		"POST": true,
-		//"PUT":       true,
-		//"DELETE":    true,
-		//"PATCH":     true,
-		//"OPTIONS":   true,
-		//"HEAD":      true,
-		//"TRACE":     true,
-		//"CONNECT":   true,
-		//"MKCOL":     true,
-		//"COPY":      true,
-		//"MOVE":      true,
-		//"PROPFIND":  true,
-		//"PROPPATCH": true,
-		//"LOCK":      true,
-		//"UNLOCK":    true,
+		// "PUT":       true,
+		// "DELETE":    true,
+		// "PATCH":     true,
+		// "OPTIONS":   true,
+		// "HEAD":      true,
+		// "TRACE":     true,
+		// "CONNECT":   true,
+		// "MKCOL":     true,
+		// "COPY":      true,
+		// "MOVE":      true,
+		// "PROPFIND":  true,
+		// "PROPPATCH": true,
+		// "LOCK":      true,
+		// "UNLOCK":    true,
 	}
 	exceptMethod = []string{"Mapping", "Init"}
 )
 
-//func AutoRoute(ginRouter *gin.Engine, controller interface{}) {
+// func AutoRoute(ginRouter *gin.Engine, controller interface{}) {
 //	/**
 //	自动路由 (Auto Router)
 //	*/
@@ -56,9 +56,9 @@ var (
 //			}
 //		}
 //	}
-//}
+// }
 
-//func AutoRouteExecute(ctx *gin.Context) {
+// func AutoRouteExecute(ctx *gin.Context) {
 //	httpPath := ctx.Request.URL.Path
 //	httpPathArr := strings.Split(httpPath, "/")
 //	// get controlle name
@@ -72,7 +72,7 @@ var (
 //	in := make([]reflect.Value, 1)
 //	in[0] = reflect.ValueOf(ctx)
 //	controller.MethodByName(routerGroup[controllerName][methodName]).Call(in)
-//}
+// }
 
 func filterControllerName(controllerName string) string {
 	name := strings.Split(controllerName, "*")

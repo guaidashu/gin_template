@@ -10,8 +10,8 @@ import (
 )
 
 func Test(ctx *gin.Context) {
-	//user := new(models.UserModel)
-	//data, _ := user.GetUserById(1)
-	//libs.Logger.Errorf("ok")
+	// user := new(models.UserModel)
+	// data, _ := user.GetUserById(1)
+	// libs.Logger.Errorf("ok")
 	libs.Success(ctx, "test is ok")
 }

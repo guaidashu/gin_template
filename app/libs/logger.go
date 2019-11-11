@@ -38,20 +38,20 @@ func InitLogger() (error, string) {
 		backendInfoLeveld := logging.AddModuleLevel(backendInfoFormatter)
 		backendInfoLeveld.SetLevel(logging.INFO, "")
 
-		//switch "INFO" {
-		//case "ERROR":
+		// switch "INFO" {
+		// case "ERROR":
 		//	backendInfoLeveld.SetLevel(logging.ERROR, "")
-		//case "WARNING":
+		// case "WARNING":
 		//	backendInfoLeveld.SetLevel(logging.WARNING, "")
-		//case "NOTICE":
+		// case "NOTICE":
 		//	backendInfoLeveld.SetLevel(logging.NOTICE, "")
-		//case "INFO":
+		// case "INFO":
 		//	backendInfoLeveld.SetLevel(logging.INFO, "")
-		//case "DEBUG":
+		// case "DEBUG":
 		//	backendInfoLeveld.SetLevel(logging.DEBUG, "")
-		//default:
+		// default:
 		//	backendInfoLeveld.SetLevel(logging.ERROR, "")
-		//}
+		// }
 
 		bk := backendInfoLeveld
 		backendList = append(backendList, bk)
