@@ -12,7 +12,7 @@ import (
 type BaseModel interface {
 	TableName() string
 	GetDB() *gorm.DB
-	CreateTable()
+	CreateTable() error
 }
 
 type Model struct {
