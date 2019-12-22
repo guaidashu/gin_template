@@ -25,13 +25,15 @@ func (u *UserModel) TableName() string {
 	return "user"
 }
 
+func (u *UserModel) HasTable() bool {
+	return GDB.HasTable(u.TableName())
+}
+
 func (u *UserModel) CreateTable() error {
 	db := u.GetDB()
-	if !db.HasTable(u.TableName()) {
-		err := db.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(u).Error
-		if err != nil {
-			return err
-		}
+	err := db.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(u).Error
+	if err != nil {
+		return err
 	}
 	return nil
 }

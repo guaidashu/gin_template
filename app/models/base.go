@@ -13,6 +13,7 @@ type BaseModel interface {
 	TableName() string
 	GetDB() *gorm.DB
 	CreateTable() error
+	HasTable() bool
 }
 
 type Model struct {

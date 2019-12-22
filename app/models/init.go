@@ -72,12 +72,27 @@ func getDB() (*gorm.DB, error) {
 	return db, nil
 }
 
-func CreateTable() {
-	user := new(UserModel)
-	err := user.CreateTable()
-	if err != nil {
-		libs.Logger.Error("create db error.")
+func createTable(models ...BaseModel) {
+
+	var (
+		err error
+	)
+
+	for _, model := range models {
+		if !model.HasTable() {
+			if err = model.CreateTable(); err != nil {
+				libs.Logger.Error(fmt.Sprintf("create table error: %v", libs.NewReportError(err)))
+			}
+		}
 	}
+
+}
+
+func CreateTable() {
+
+	user := new(UserModel)
+	createTable(user)
+
 }
 
 func CloseDB() {
