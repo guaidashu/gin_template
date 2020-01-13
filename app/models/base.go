@@ -23,3 +23,11 @@ type Model struct {
 	DeletedAt *time.Time `json:"deleted_at"`
 	Status    int        `gorm:"default:1" json:"status"`
 }
+
+func getTable(gdb *gorm.DB, tableName string) *gorm.DB {
+	db := gdb.Table(tableName)
+	if db != nil {
+		db = db.Where("status = ?", 1)
+	}
+	return db
+}

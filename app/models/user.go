@@ -14,11 +14,7 @@ type UserModel struct {
 }
 
 func (u *UserModel) GetDB() *gorm.DB {
-	db := GDB.Table(u.TableName())
-	if db != nil {
-		return db.Where("status = ?", 1)
-	}
-	return db
+	return getTable(GDB, u.TableName())
 }
 
 func (u *UserModel) TableName() string {
