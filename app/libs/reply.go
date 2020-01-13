@@ -32,3 +32,21 @@ func Error(ctx *gin.Context, msg string) {
 	}
 	ctx.JSON(http.StatusOK, r)
 }
+
+func CustomReply(ctx *gin.Context, code int, msg string, data ...interface{}) {
+	var (
+		replyData interface{}
+	)
+
+	if len(data) > 0 {
+		replyData = data[0]
+	}
+
+	r := &Reply{
+		Code: code,
+		Msg:  msg,
+		Data: replyData,
+	}
+
+	ctx.JSON(http.StatusOK, r)
+}
