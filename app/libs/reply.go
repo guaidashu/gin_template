@@ -40,6 +40,8 @@ func CustomReply(ctx *gin.Context, code int, msg string, data ...interface{}) {
 
 	if len(data) > 0 {
 		replyData = data[0]
+	} else {
+		replyData = ""
 	}
 
 	r := &Reply{
