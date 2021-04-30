@@ -7,14 +7,19 @@ package config
 import (
 	"fmt"
 	"github.com/guaidashu/go_helper/configor"
+	"log"
+	"os"
+	"regexp"
+	"strings"
 )
 
 type CustomConfig struct {
-	Mysql      MysqlConf
-	PostGreSql PostGreSql
-	App        AppConf
-	Redis      RedisConf
-	Mongodb    MongodbConf
+	Mysql       MysqlConf
+	PostGreSql  PostGreSql
+	App         AppConf
+	Redis       RedisConf
+	Mongodb     MongodbConf
+	MiniProgram MiniProgramConf
 }
 
 type MysqlConf struct {
@@ -31,6 +36,7 @@ type AppConf struct {
 	RunAddress string      `json:"run_address"`
 	RunPort    interface{} `json:"run_port"`
 	DEBUG      bool        `json:"debug"`
+	Mode       string      `json:"mode"` // 配置文件环境
 }
 
 type RedisConf struct {
@@ -57,21 +63,88 @@ type MongodbConf struct {
 	PoolSize int         `json:"pool_size"`
 }
 
+type MiniProgramConf struct {
+	Appid           string `json:"appid"`
+	Secret          string `json:"secret"`
+	Token           string `json:"token"`
+	TokenSecretKey  string `json:"token_secret_key"`
+	TokenExpireTime int    `json:"token_expire_time"`
+	Tokenissuer     string `json:"tokenissuer"`
+}
+
 var Config CustomConfig
 
-func init() {
-	fmt.Println("开始加载开发配置文件")
-	err := configor.Load(&Config, "app/config/config_dev.yml")
-	if err != nil || Config.App.LogDir == "" {
-		fmt.Println("开发环境配置文件加载失败")
-		err = configor.Load(&Config, "app/config/config_product.yml")
-		if err != nil || Config.App.LogDir == "" {
-			fmt.Println("线上环境配置文件加载失败")
-			fmt.Println("配置文件加载失败")
-		} else {
-			fmt.Println("线上环境配置文件加载成功")
-		}
+func InitConf() {
+	var (
+		err  error
+		pwd  string
+		conf string
+	)
+
+	conf = os.Getenv("GIN_CONFIG")
+
+	devMap := map[string]string{
+		"debug":   "config_dev",
+		"release": "config_product",
+	}
+
+	if conf == "" {
+		conf = "debug"
+	}
+
+	if pwd, err = os.Getwd(); err != nil {
+		log.Println("get config pwd error: ", err.Error())
+		pwd = "."
 	} else {
-		fmt.Println("开发环境配置文件加载完成")
+		pwd = strings.Replace(pwd, "\\", "/", -1)
+		re3, _ := regexp.Compile("gin_template(.?)*([a-zA-Z])*")
+		rep := re3.ReplaceAllStringFunc(pwd, func(s string) string {
+			return ""
+		})
+		pwd = rep + "gin_template"
+	}
+
+	fmt.Println("开始加载开发配置文件")
+	err = configor.Load(&Config, fmt.Sprintf("%s/app/config/%v.yml", pwd, devMap[conf]))
+	if err != nil || Config.App.LogDir == "" {
+		fmt.Println("配置文件加载失败")
+	} else {
+		fmt.Println("配置文件加载完成")
+	}
+}
+
+func InitConfForTest(conf string) {
+	var (
+		err error
+		pwd string
+	)
+
+	devMap := map[string]string{
+		"debug":   "config_dev",
+		"release": "config_product",
+	}
+
+	if conf == "" {
+		conf = "debug"
+	}
+
+	if pwd, err = os.Getwd(); err != nil {
+		log.Println("get config pwd error: ", err.Error())
+		pwd = "."
+	} else {
+		pwd = strings.Replace(pwd, "\\", "/", -1)
+		re3, _ := regexp.Compile("gin_template(.?)*([a-zA-Z])*")
+		rep := re3.ReplaceAllStringFunc(pwd, func(s string) string {
+			return ""
+		})
+		pwd = rep + "gin_template"
+	}
+
+	fmt.Println("开始加载开发配置文件")
+	err = configor.Load(&Config, fmt.Sprintf("%s/app/config/%v.yml", pwd, devMap[conf]))
+	if err != nil || Config.App.LogDir == "" {
+		fmt.Println("配置文件加载失败")
+	} else {
+		fmt.Println("配置文件加载完成")
 	}
 }

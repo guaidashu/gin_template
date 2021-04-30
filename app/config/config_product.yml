@@ -44,6 +44,12 @@ mongodb:
     ""
   poolsize:
     1
+miniprogram:
+  appid: ""
+  secret: ""
+  token: ""
+  tokenexpiretime: 72
+  tokenissuer: "guaidashu"
 app:
   runaddress:
     "127.0.0.1"
@@ -53,3 +59,5 @@ app:
     "logs"
   debug:
     true
+  mode:
+    "debug"

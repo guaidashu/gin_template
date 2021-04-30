@@ -6,6 +6,7 @@ package init
 
 import (
 	"fmt"
+	"gin_template/app/config"
 	_ "gin_template/app/config"
 	"gin_template/app/libs"
 	"gin_template/app/models"
@@ -15,6 +16,7 @@ import (
 )
 
 func init() {
+	config.InitConf()
 	// 初始化日志
 	err, _ := libs.InitLogger()
 	if err != nil {
@@ -42,5 +44,5 @@ func init() {
 	libs.Logger.Info("====== 初始化mongodb系统 ======")
 	mongodb.InitMongoDB()
 	// 自动建表(目前仅针对于 mysql 和 postgresql 可开启此功能)， 或者通过 router里配置的init_table 可视化访问来创建
-	//models.CreateTable()
+	// models.CreateTable()
 }
