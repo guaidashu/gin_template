@@ -1,0 +1,6 @@
+# Default Kibana configuration for docker target
+server.name: gin_template_kibana
+server.host: "0"
+elasticsearch.hosts: [ "http://gin_template_elasticsearch:9200", "http://gin_template_elasticsearch2:9200", "http://gin_template_elasticsearch3:9200" ]
+xpack.monitoring.ui.container.elasticsearch.enabled: true
+#i18n.locale: "zh-CN"

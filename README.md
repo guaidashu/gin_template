@@ -1,30 +1,54 @@
 # **A golang template which base gin, designed by yy**
 
 ## Installing and Getting started
-    
-    .
-    ├── README.md
-    ├── app             # 应用目录
-    │   ├── config      # 配置
-    │   ├── controller  # 控制器
-    │   ├── data_struct # 所有需要的额外结构体
-    │   ├── ginServer   # gin engine代理
-    │   ├── init        # 初始化所有内容，包括数据库等
-    │   ├── libs        # 自定义工具包
-    │   ├── models      # 数据库orm
-    │   └── router      # 路由配置
-    ├── go.mod          # go mod依赖文件
-    ├── go.sum
-    └── main.go         # 入口文件 
+
+      ├── app
+      │   ├── config                   # 配置层
+      │   ├── controller               # controller 层
+      │   ├── data_struct              # 结构体存储层
+      │   ├── enum                     # 枚举层
+      │   ├── ginServer                # router初始化层
+      │   ├── init                     # 初始化所有依赖层
+      │   ├── libs                     # 小工具层
+      │   ├── middlewares              # 中间件
+      │   ├── miniprogram              # 小程序层
+      │   ├── models                   # mysql 层
+      │   ├── redis                    # redis初始化层
+      │   ├── router                   # 路由层
+      │   └── services                 # 逻辑层
+      ├── docker-compose.yml           # docker-compose 启动文件
+      ├── go.mod
+      ├── go.sum
+      ├── kibana.yml                   # kibana 日志分析工具配置文件
+      ├── logs                         # 日志
+      ├── main.go                      # 入口文件
+      ├── README.md
+      ├── statics                      # 静态资源文件夹
+      │   └── excel
+      ├── test                         # 测试文件夹
+      └── volumes                      # docker的依赖文件夹(用于持久化docker数据)
+          ├── elasticsearch            # es 文件夹
+          ├── elasticsearch2           # es 文件夹
+          ├── elasticsearch3           # es 文件夹
+          └── kafka                    # kafka 文件夹
+
+PS: Please create the directory that called volumes in root path.
+
+      └── volumes                      # docker的依赖文件夹(用于持久化docker数据)
+          ├── elasticsearch            # es 文件夹
+          ├── elasticsearch2           # es 文件夹
+          ├── elasticsearch3           # es 文件夹
+          └── kafka                    # kafka 文件夹
+
 
 1. Clone the repository.
 
-       git clone git@github.com:guaidashu/gin_template.git
+       git clone git@github.com:guaidashu/law_article_find.git
 
 2. Add some code in gin.go and context.go
-  
-    (1) Add code on line 105 in gin.go
-        
+
+   (1) Add code on line 105 in gin.go
+
         import(
             ...
             "reflect"
@@ -52,9 +76,9 @@
             }
             engine.AutoRouterController[controllerName] = *controller
         }
-    
-    (2) Add code on anywhere in context.go
-    
+
+   (2) Add code on anywhere in context.go
+
         import(
             ...
             "reflect"
