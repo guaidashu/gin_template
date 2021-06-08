@@ -59,5 +59,9 @@ app:
     "logs"
   debug:
     true
+  tokenkey:
+    "law_article_find_user_token"
+  tokenexpiretime:
+    7
   mode:
     "debug"

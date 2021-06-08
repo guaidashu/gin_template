@@ -32,11 +32,13 @@ type MysqlConf struct {
 }
 
 type AppConf struct {
-	LogDir     string      `json:"log_dir"`
-	RunAddress string      `json:"run_address"`
-	RunPort    interface{} `json:"run_port"`
-	DEBUG      bool        `json:"debug"`
-	Mode       string      `json:"mode"` // 配置文件环境
+	LogDir          string      `json:"log_dir"`
+	RunAddress      string      `json:"run_address"`
+	RunPort         interface{} `json:"run_port"`
+	DEBUG           bool        `json:"debug"`
+	TokenKey        string      `json:"token_key"`
+	TokenExpireTime int64       `json:"token_expire_time"`
+	Mode            string      `json:"mode"` // 配置文件环境
 }
 
 type RedisConf struct {
