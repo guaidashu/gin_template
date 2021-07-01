@@ -1,6 +1,6 @@
 version: '3'
 networks:
-  gin_template_network:
+  gin_template_kafka_network:
 
 services:
   gin_template_zookeeper:
@@ -9,7 +9,7 @@ services:
     ports:
       - 2181:2181
     networks:
-      - gin_template_network
+      - gin_template_kafka_network
   gin_template_kafka:
     image: wurstmeister/kafka
     container_name: gin_template_kafka
@@ -22,6 +22,6 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_CREATE_TOPICS: "stream-in:1:1,stream-out:1:1"
     networks:
-      - gin_template_network
+      - gin_template_kafka_network
     volumes:
       - ${PWD}/volumes/kafka/docker.sock:/var/run/docker.sock

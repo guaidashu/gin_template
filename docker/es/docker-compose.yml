@@ -1,6 +1,6 @@
 version: '3'
 networks:
-  gin_template_network:
+  gin_template_es_network:
 
 services:
   gin_template_elasticsearch:
@@ -23,7 +23,7 @@ services:
     volumes:
       - ${PWD}/volumes/elasticsearch:/usr/share/elasticsearch/data
     networks:
-      - gin_template_network
+      - gin_template_es_network
   gin_template_elasticsearch2:
     image: elasticsearch:7.11.2
     container_name: gin_template_elasticsearch2
@@ -44,7 +44,7 @@ services:
     volumes:
       - ${PWD}/volumes/elasticsearch2:/usr/share/elasticsearch/data # es集群每个节点的volume 映射位置不能相同
     networks:
-      - gin_template_network
+      - gin_template_es_network
   gin_template_elasticsearch3:
     image: elasticsearch:7.11.2
     container_name: gin_template_elasticsearch3
@@ -65,7 +65,7 @@ services:
     volumes:
       - ${PWD}/volumes/elasticsearch3:/usr/share/elasticsearch/data # es集群每个节点的volume 映射位置不能相同
     networks:
-      - gin_template_network
+      - gin_template_es_network
   gin_template_kibana:
     container_name: gin_template_kibana
     image: kibana:7.11.2
@@ -78,4 +78,4 @@ services:
     volumes:
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml
     networks:
-      - gin_template_network
+      - gin_template_es_network

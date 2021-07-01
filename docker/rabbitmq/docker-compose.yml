@@ -1,6 +1,6 @@
 version: '3'
 networks:
-  gin_template_network:
+  gin_template_rq_network:
 
 services:
   rabbitmq:
@@ -20,4 +20,4 @@ services:
     volumes:
       - ${PWD}/volumes/rabbitmq:/var/lib/rabbitmq
     networks:
-      - gin_template_network
+      - gin_template_rq_network

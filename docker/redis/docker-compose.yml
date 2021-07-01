@@ -1,5 +1,21 @@
 version: '3'
-networks:
-  gin_template_network:
 
 services:
+  master:
+    image: redis
+    container_name: redis-master
+    command: redis-server --requirepass redis_pwd  --masterauth redis_pwd
+    ports:
+      - 6380:6379
+  slave1:
+    image: redis
+    container_name: redis-slave-1
+    ports:
+      - 6381:6379
+    command:  redis-server --slaveof redis-master 6379 --requirepass redis_pwd --masterauth redis_pwd
+  slave2:
+    image: redis
+    container_name: redis-slave-2
+    ports:
+      - 6382:6379
+    command: redis-server --slaveof redis-master 6379 --requirepass redis_pwd --masterauth redis_pwd

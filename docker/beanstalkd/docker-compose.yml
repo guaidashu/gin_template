@@ -1,6 +1,6 @@
 version: '3'
 networks:
-  gin_template_network:
+  gin_template_beanstalkd_network:
 
 services:
   gin_template_beanstalkd:
@@ -11,7 +11,7 @@ services:
     volumes:
       - ${PWD}/beanstalk_data:/data
     networks:
-      - gin_template_network
+      - gin_template_beanstalkd_network
   gin_template_beanstalkd2:
     image: schickling/beanstalkd
     container_name: gin_template_beanstalkd2
@@ -20,7 +20,7 @@ services:
     volumes:
       - ${PWD}/beanstalk_data2:/data
     networks:
-      - gin_template_network
+      - gin_template_beanstalkd_network
   gin_template_beanstalkd-console:
     image: schickling/beanstalkd-console
     container_name: beanstalkd-console
@@ -35,4 +35,4 @@ services:
     ports:
       - 2080:2080
     networks:
-      - gin_template_network
+      - gin_template_beanstalkd_network
