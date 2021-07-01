@@ -1,0 +1,38 @@
+version: '3'
+networks:
+  gin_template_network:
+
+services:
+  gin_template_beanstalkd:
+    image: schickling/beanstalkd
+    container_name: gin_template_beanstalkd
+    ports:
+      - 11300:11300
+    volumes:
+      - ${PWD}/beanstalk_data:/data
+    networks:
+      - gin_template_network
+  gin_template_beanstalkd2:
+    image: schickling/beanstalkd
+    container_name: gin_template_beanstalkd2
+    ports:
+      - 11301:11300
+    volumes:
+      - ${PWD}/beanstalk_data2:/data
+    networks:
+      - gin_template_network
+  gin_template_beanstalkd-console:
+    image: schickling/beanstalkd-console
+    container_name: beanstalkd-console
+    depends_on:
+      - gin_template_beanstalkd
+      - gin_template_beanstalkd2
+    links:
+      - gin_template_beanstalkd
+      - gin_template_beanstalkd2
+    environment:
+      BEANSTALKD_PORT_11300_TCP_ADDR: gin_template_beanstalkd
+    ports:
+      - 2080:2080
+    networks:
+      - gin_template_network

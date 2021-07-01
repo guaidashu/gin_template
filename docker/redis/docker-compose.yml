@@ -1,0 +1,5 @@
+version: '3'
+networks:
+  gin_template_network:
+
+services:
