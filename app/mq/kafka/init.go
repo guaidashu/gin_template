@@ -95,3 +95,13 @@ func (k *Kq) startConsumer() {
 func (k *Kq) Start() {
 	k.startConsumer()
 }
+
+func (k *Kq) Stop() {
+	for key := range k.producers {
+		_ = k.producers[key].producer.Close()
+	}
+
+	for key := range k.consumers {
+		_ = k.consumers[key].consumer.Close()
+	}
+}

@@ -11,6 +11,7 @@ import (
 	"gin_template/app/config"
 	"gin_template/app/libs"
 	"gin_template/app/models"
+	mq "gin_template/app/mq/kafka"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -25,6 +26,13 @@ var (
 
 func init() {
 	Router = gin.Default()
+}
+
+func closeEnv() {
+	// 关闭数据库
+	models.CloseDB()
+	// 关闭kafka consumer和producer
+	mq.Kafka.Stop()
 }
 
 func Run(addr ...string) {
@@ -78,8 +86,8 @@ func startServer(address string, processed chan struct{}) error {
 	}()
 
 	err = server.ListenAndServe()
-	// 关闭数据库
-	models.CloseDB()
+	// 关闭对应的所有环境
+	closeEnv()
 
 	if http.ErrServerClosed != err {
 		err = errors.New(fmt.Sprintf("server not gracefully shutdown, err :%v", err))
