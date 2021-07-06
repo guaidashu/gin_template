@@ -43,7 +43,7 @@ func NewConsumer(address []string, topic string, handle ConsumeHandler) *Consume
 		MinBytes:       10e3, // 10KB
 		MaxBytes:       10e6, // 10MB
 		StartOffset:    -2,
-		GroupID:        "law_article_find_queue",
+		GroupID:        "gin_template_queue",
 		MaxWait:        defaultMaxWait,
 		CommitInterval: defaultCommitInterval,
 		QueueCapacity:  defaultQueueCapacity,
