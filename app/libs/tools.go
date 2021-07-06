@@ -4,7 +4,10 @@
 
 package libs
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // 判断一个 元素 是否存在数组(切片中)
 func InSlice(v string, sl []string) bool {
@@ -33,4 +36,16 @@ func GetNowTimeMon(nowTimeStamp int64) string {
 		nowTimeStamp = time.Now().Unix()
 	}
 	return time.Unix(nowTimeStamp, 0).UTC().Format("2006-01-02")
+}
+
+func RunSafe(fn func()) {
+	go func() {
+		defer func() {
+			if err := recover(); err != nil {
+				fmt.Println(err)
+			}
+		}()
+
+		fn()
+	}()
 }

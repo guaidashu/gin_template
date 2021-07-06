@@ -19,6 +19,7 @@ type CustomConfig struct {
 	App         AppConf
 	Redis       RedisConf
 	Mongodb     MongodbConf
+	Kafka       KafkaConf
 	MiniProgram MiniProgramConf
 }
 
@@ -72,6 +73,10 @@ type MiniProgramConf struct {
 	TokenSecretKey  string `json:"token_secret_key"`
 	TokenExpireTime int    `json:"token_expire_time"`
 	Tokenissuer     string `json:"tokenissuer"`
+}
+
+type KafkaConf struct {
+	Hosts []string `json:"hosts"`
 }
 
 var Config CustomConfig
