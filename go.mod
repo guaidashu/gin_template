@@ -10,7 +10,7 @@ require (
 	github.com/guaidashu/go_mongodb_yy v0.0.0-20191022125728-322d2a848ba9
 	github.com/jinzhu/gorm v1.9.10
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
-	github.com/segmentio/kafka-go v0.4.17 // indirect
+	github.com/segmentio/kafka-go v0.4.17
 	github.com/tidwall/pretty v1.0.2 // indirect
 	go.mongodb.org/mongo-driver v1.1.2
 	golang.org/x/net v0.0.0-20191021144547-ec77196f6094 // indirect

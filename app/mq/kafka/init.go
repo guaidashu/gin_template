@@ -74,7 +74,8 @@ func (k *Kq) startConsumer() {
 	for key := range k.consumers {
 		libs.RunSafe(func() {
 			for {
-				m, err := k.consumers[key].consumer.ReadMessage(context.Background())
+				// m, err := k.consumers[key].consumer.ReadMessage(context.Background())
+				m, err := k.consumers[key].consumer.FetchMessage(context.Background())
 				if err != nil {
 					break
 				}
@@ -85,6 +86,8 @@ func (k *Kq) startConsumer() {
 					continue
 				}
 
+				// 当用了group的时候, ReadMessage函数会自动执行 CommitMessages函数提交事务,
+				// 这样不安全,所以,使用FetchMessage
 				_ = k.consumers[key].consumer.CommitMessages(context.Background(), m)
 			}
 		})
