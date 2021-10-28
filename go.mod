@@ -10,6 +10,7 @@ require (
 	github.com/guaidashu/go_helper v0.0.0-20191027154739-f877eaf34227
 	github.com/guaidashu/go_mongodb_yy v0.0.0-20191022125728-322d2a848ba9
 	github.com/jinzhu/gorm v1.9.10
+	github.com/jinzhu/now v1.1.1
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
 	github.com/segmentio/kafka-go v0.4.17
 	github.com/shopspring/decimal v1.3.1
