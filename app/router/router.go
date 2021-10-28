@@ -19,6 +19,8 @@ func init() {
 	// 添加 静态资源路由
 	// ginServer.StaticFS("/asset", http.Dir("app/asset"))
 
+	// 开启跨域
+	// ginServer.Router.Use(middlewares.Cors())
 	test := ginServer.Group("/test")
 	{
 		test.GET("/", controller.Test)

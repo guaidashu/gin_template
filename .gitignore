@@ -8,3 +8,4 @@ gin_template
 .DS_Store
 **/.DS_Store
 go.sum
+app/models/generate/generate

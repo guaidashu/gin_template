@@ -24,9 +24,9 @@ func init() {
 	libs.Logger.Info("======= 初始化日志系统 ======")
 	// 初始化redis
 	// libs.Logger.Info("====== 初始化redis系统 ======")
-	// err = redis.InitRedis()
+	// err = rds.InitRedis()
 	// if err != nil {
-	// 	libs.Logger.Info(fmt.Sprintf("init redis failed, error: %v", libs.NewReportError(err)))
+	// 	libs.Logger.Info(fmt.Sprintf("init rds failed, error: %v", libs.NewReportError(err)))
 	// }
 	// 初始化mysql
 	libs.Logger.Info("====== 初始化mysql系统 ======")

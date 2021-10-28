@@ -8,8 +8,10 @@
 package enum
 
 const (
-	AUTO_WHERE          = "1" // 自动 and 拼接
-	AUTO_OR             = "2" // 自动 or 拼接
-	AUTO_CUSTOME_HANDLE = "3" // 自定义函数 处理
-	AUTO_LIKE           = "4" // 自动 like 模糊匹配
+	AutoWhere        = "and"     // 自动 and 拼接
+	AutoOr           = "or"      // 自动 or 拼接
+	AutoCustomHandle = "custom"  // 自定义函数 处理
+	AutoLike         = "like"    // 自动 like 模糊匹配
+	FieldIsHandle    = "sql"     // 操作类型
+	FieldHandle      = "sqlCond" // 操作具体语句
 )

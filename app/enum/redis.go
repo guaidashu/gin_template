@@ -9,7 +9,7 @@ package enum
 
 // redis锁时间
 const (
-	DEFAULT_LOCK_ACQUIRE_TIMEOUT = 1 // 秒
-	DEFAULT_LOCK_KEY_TIMEOUT     = 1
-	LOCK_PREFIX                  = "lock:"
+	DefaultLockAcquireTimeout = 1 // 秒
+	DefaultLockKeyTimeout     = 1
+	LockPrefix                = "redis_lock:"
 )

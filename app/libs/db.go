@@ -105,16 +105,16 @@ func queryAutoWhere(db *gorm.DB, search interface{}, fieldIsHandle, fieldHandle 
 		}
 
 		switch handleType {
-		case enum.AUTO_WHERE:
+		case enum.AutoWhere:
 			db = db.Where(vt.Field(i).Tag.Get(fieldHandle), data)
-		case enum.AUTO_OR:
+		case enum.AutoOr:
 			db = db.Or(vt.Field(i).Tag.Get(fieldHandle), data)
-		case enum.AUTO_CUSTOME_HANDLE:
+		case enum.AutoCustomHandle:
 			// 根据条件 判断大于和小于
 			if len(separate) > 0 {
 				db = separate[0][vt.Field(i).Tag.Get("json")](db, data)
 			}
-		case enum.AUTO_LIKE:
+		case enum.AutoLike:
 			db = db.Where(vt.Field(i).Tag.Get(fieldHandle), "%"+fmt.Sprintf("%v", data)+"%")
 		}
 

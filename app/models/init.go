@@ -9,7 +9,7 @@ import (
 	"gin_template/app/config"
 	"gin_template/app/libs"
 	"gin_template/app/mongodb"
-	"gin_template/app/redis"
+	"gin_template/app/rds"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -111,10 +111,10 @@ func CloseDB() {
 		}
 	}
 
-	if redis.Redis != nil {
-		libs.Logger.Info("Close redis")
-		if err = redis.Redis.Close(); err != nil {
-			libs.Logger.Info("Close redis failed, error: %v", err)
+	if rds.Redis != nil {
+		libs.Logger.Info("Close rds")
+		if err = rds.Redis.Close(); err != nil {
+			libs.Logger.Info("Close rds failed, error: %v", err)
 		}
 	}
 

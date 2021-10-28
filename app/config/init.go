@@ -67,12 +67,12 @@ type MongodbConf struct {
 }
 
 type MiniProgramConf struct {
-	Appid           string `json:"appid"`
+	AppId           string `json:"app_id"`
 	Secret          string `json:"secret"`
 	Token           string `json:"token"`
 	TokenSecretKey  string `json:"token_secret_key"`
 	TokenExpireTime int    `json:"token_expire_time"`
-	Tokenissuer     string `json:"tokenissuer"`
+	TokenIssuer     string `json:"token_issuer"`
 }
 
 type KafkaConf struct {

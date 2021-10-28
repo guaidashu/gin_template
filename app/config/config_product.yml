@@ -67,4 +67,4 @@ app:
   tokenexpiretime:
     7
   mode:
-    "debug"
+    "release"
