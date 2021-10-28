@@ -9,3 +9,4 @@ gin_template
 **/.DS_Store
 go.sum
 app/models/generate/generate
+docker/kafka/.env
