@@ -89,10 +89,9 @@ func createTable(models ...BaseModel) {
 }
 
 func CreateTable() {
-
-	user := new(UserModel)
-	createTable(user)
-
+	createTable(
+		NewUserModel(),
+	)
 }
 
 func CloseDB() {
