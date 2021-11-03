@@ -13,10 +13,11 @@ import (
 )
 
 type BaseModel interface {
-	TableName() string
-	GetDB() *gorm.DB
-	CreateTable() error
-	HasTable() bool
+	TableName() string            // 获取数据表名
+	getDB() *gorm.DB              // 获取db实例
+	getDBWithNoDeleted() *gorm.DB // 获取未被软删除的db实例
+	CreateTable() error           // 创建表
+	HasTable() bool               // 表是否存在
 }
 
 type Model struct {
