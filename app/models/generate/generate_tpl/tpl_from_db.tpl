@@ -2,7 +2,7 @@ package models
 
 import (
 	"fmt"
-	"gin_template/app/libs/serror"
+	"service/app/libs/serror"
 	"sync"
 
 	"github.com/jinzhu/gorm"
@@ -61,23 +61,23 @@ func (model *defaultTemplateModel) CreateTable() error {
 }
 
 // 创建数据并返回本次插入的ID
-func (model *defaultTemplateModel) Create(templateModel *TemplateModel) (templateIdId int64, err error) {
+func (model *defaultTemplateModel) Create(templateModel *TemplateModel) (Id int64, err error) {
 	db := model.getDB().Create(templateModel)
 	if err = db.Error; err != nil {
 		return
 	}
 	// 获取本次ID
-	templateIdId = db.RowsAffected
+	Id = db.RowsAffected
 
 	return
 }
 
 // 通过主键获取 数据
-func (model *defaultTemplateModel) FindOne(templateIdId int64) (*TemplateModel, error) {
-	db := model.getDB().Where("template_id_id = ?", templateIdId)
+func (model *defaultTemplateModel) FindOne(Id int64) (*TemplateModel, error) {
+	db := model.getDB().Where("id = ?", Id)
 
 	templateModel := new(TemplateModel)
-	key := fmt.Sprintf("%s%d", templateCacheKey, templateIdId)
+	key := fmt.Sprintf("%s%d", templateCacheKey, Id)
 	err := model.QueryRow(templateModel, key, db, func(conn *gorm.DB, v interface{}) error {
 		return conn.First(v).Error
 	})
@@ -98,8 +98,8 @@ func (model *defaultTemplateModel) Update(templateModel *TemplateModel) error {
 	}
 
 	// 更新
-	delete(update, "template_id_id")
-	err = db.Where("template_id_id = ?", templateModel.TemplateIdId).Updates(update).Error
+	delete(update, "id")
+	err = db.Where("id = ?", templateModel.TemplateIdId).Updates(update).Error
 	if err != nil {
 		err = serror.NewErr().SetErr(err)
 		return err
@@ -110,8 +110,8 @@ func (model *defaultTemplateModel) Update(templateModel *TemplateModel) error {
 }
 
 // 通过主键ID获取单条数据 (已经被软删除的数据)
-func (model *defaultTemplateModel) GetTemplateIdById(templateIdId int64) (templateModel *TemplateModel, err error) {
-	templateModel, err = model.FindOne(templateIdId)
+func (model *defaultTemplateModel) GetTemplateIdById(Id int64) (templateModel *TemplateModel, err error) {
+	templateModel, err = model.FindOne(Id)
 	if err != nil {
 		return
 	}
