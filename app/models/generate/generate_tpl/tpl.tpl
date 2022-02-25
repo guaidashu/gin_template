@@ -2,7 +2,7 @@ package models
 
 import (
 	"fmt"
-	"service/app/libs/serror"
+	"gin_template/app/libs/serror"
 	"sync"
 
 	"github.com/jinzhu/gorm"
