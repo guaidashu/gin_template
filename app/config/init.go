@@ -33,13 +33,17 @@ type MysqlConf struct {
 }
 
 type AppConf struct {
-	LogDir          string      `json:"log_dir"`
-	RunAddress      string      `json:"run_address"`
-	RunPort         interface{} `json:"run_port"`
-	DEBUG           bool        `json:"debug"`
-	TokenKey        string      `json:"token_key"`
-	TokenExpireTime int64       `json:"token_expire_time"`
-	Mode            string      `json:"mode"` // 配置文件环境
+	LogDir                 string      `json:"log_dir"`
+	RunAddress             string      `json:"run_address"`
+	RunPort                interface{} `json:"run_port"`
+	DEBUG                  bool        `json:"debug"`
+	AdminTokenKey          string      `json:"admin_token_key"`           // 管理员token的key
+	TokenKey               string      `json:"token_key"`                 // 用户token的key
+	TokenMerchantKey       string      `json:"token_merchant_key"`        // 商户token的key
+	RefreshTokenKey        string      `json:"refresh_token_key"`         // 刷新token的key
+	TokenExpireTime        int64       `json:"token_expire_time"`         // token刷新时间
+	RefreshTokenExpireTime int64       `json:"refresh_token_expire_time"` // refresh token刷新时间
+	Mode                   string      `json:"mode"`                      // 配置文件环境
 }
 
 type RedisConf struct {
