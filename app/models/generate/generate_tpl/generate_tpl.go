@@ -141,7 +141,7 @@ func getTables(tableNames string) []Table {
 	if tableNames == "" {
 		models.GDB.Raw("SELECT TABLE_NAME as Name,TABLE_COMMENT as Comment FROM information_schema.TABLES WHERE table_schema='" + config.Config.Mysql.Database + "';").Find(&tables)
 	} else {
-		models.GDB.Raw("SELECT TABLE_NAME as Name,TABLE_COMMENT as Comment FROM information_schema.TABLES WHERE TABLE_NAME IN (" + tableNames + ") AND table_schema='" + config.Config.Mysql.Database + "';").Find(&tables)
+		models.GDB.Raw("SELECT TABLE_NAME as Name,TABLE_COMMENT as Comment FROM information_schema.TABLES WHERE TABLE_NAME IN ('" + tableNames + "') AND table_schema='" + config.Config.Mysql.Database + "';").Find(&tables)
 	}
 	return tables
 }

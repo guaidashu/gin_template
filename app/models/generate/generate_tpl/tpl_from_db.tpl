@@ -88,7 +88,7 @@ func (model *defaultTemplateModel) FindOne(Id int64) (*TemplateModel, error) {
 // 单条更新, 多条更新请自行定义并维护键值
 func (model *defaultTemplateModel) Update(templateModel *TemplateModel) error {
 	db := model.getDB()
-	key := fmt.Sprintf("%s%d", templateCacheKey, templateModel.TemplateIdId)
+	key := fmt.Sprintf("%s%d", templateCacheKey, templateModel.Id)
 
 	// 先转换为更新map
 	update, err := struct2Map(templateModel, nil)
@@ -99,7 +99,7 @@ func (model *defaultTemplateModel) Update(templateModel *TemplateModel) error {
 
 	// 更新
 	delete(update, "id")
-	err = db.Where("id = ?", templateModel.TemplateIdId).Updates(update).Error
+	err = db.Where("id = ?", templateModel.Id).Updates(update).Error
 	if err != nil {
 		err = serror.NewErr().SetErr(err)
 		return err
