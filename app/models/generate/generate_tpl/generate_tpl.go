@@ -104,7 +104,9 @@ func GenerateTpl(table Table, fields []Field) {
 			fieldType := getFiledType(field)
 			fieldComment := getFieldComment(field)
 
-			content += "\t\t" + fieldComment + "\r\n"
+			if fieldComment != "" {
+				content += "\t\t" + fieldComment + "\r\n"
+			}
 			content += "\t\t" + fieldName + " " + fieldType + " `" + fieldGorm + " " + fieldJson + "`" + "\r\n"
 		}
 		content += "\t}"
