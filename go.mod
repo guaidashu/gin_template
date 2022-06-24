@@ -16,9 +16,8 @@ require (
 	github.com/segmentio/kafka-go v0.4.17
 	github.com/shopspring/decimal v1.3.1
 	github.com/tidwall/pretty v1.0.2 // indirect
-	go.mongodb.org/mongo-driver v1.1.2
-	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
-	golang.org/x/net v0.0.0-20191021144547-ec77196f6094 // indirect
+	go.mongodb.org/mongo-driver v1.5.1
+	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073
 	golang.org/x/sys v0.0.0-20191022100944-742c48ecaeb7 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 )
