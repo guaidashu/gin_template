@@ -10,9 +10,8 @@ var Cache *Group
 
 func init() {
 	Cache = &Group{
-		m:     make(map[string]*sync.Mutex),
 		cache: cache.New(5*time.Minute, 10*time.Minute),
-		lock:  &sync.Mutex{},
-		mw:    make(map[string]*sync.WaitGroup),
+		lock:  sync.Mutex{},
+		data:  make(map[string]*cacheData),
 	}
 }

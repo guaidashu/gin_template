@@ -9,16 +9,25 @@ import (
 )
 
 const (
-	EmptyMark           = "*"
-	EmptyMarkExpireTime = time.Second * 60 * 1
+	EmptyMark           emptyType = "*"
+	EmptyMarkExpireTime           = time.Second * 60 * 1
 )
 
-type Group struct {
-	m     map[string]*sync.Mutex // lazily initialized
-	cache *cache.Cache           // lazily initialized
-	lock  *sync.Mutex
-	mw    map[string]*sync.WaitGroup
-}
+type (
+	emptyType string
+
+	cacheData struct {
+		val       interface{}
+		waitGroup sync.WaitGroup
+		err       error
+	}
+
+	Group struct {
+		cache *cache.Cache // lazily initialized
+		lock  sync.Mutex
+		data  map[string]*cacheData
+	}
+)
 
 // 注解：
 // 这个操作方式会阻塞后来的请求，同一个key来10个请求，只会执行一次函数体(内可以为mysql查询等)，其他的请求等待第一个执行的结果
@@ -26,45 +35,47 @@ type Group struct {
 func (g *Group) Do(key string, fn func() (interface{}, error), expireTime ...time.Duration) (interface{}, error) {
 	// 加大锁防止内部锁未初始化争抢
 	g.lock.Lock()
-	if _, ok := g.m[key]; !ok {
-		g.m[key] = &sync.Mutex{}
+
+	if data, ok := g.data[key]; ok {
+		// 解大锁
+		g.lock.Unlock()
+		// wait group等待
+		data.waitGroup.Wait()
+
+		return data.val, data.err
 	}
-	// 解大锁
+
+	c := new(cacheData)
+	c.waitGroup.Add(1)
+	g.data[key] = c
+	// 解锁后用waitGroup在等待了
 	g.lock.Unlock()
 
-	expire := time.Duration(0)
-	g.m[key].Lock()
-
+	// 先从 go-cache 获取数据，如果存在，则直接跳过
 	if data, ok := g.cache.Get(key); ok {
-		g.m[key].Unlock()
-		// wait group存在则等待，不存在则直接返回
-		if _, exist := g.mw[key]; exist {
-			g.mw[key].Wait()
+		c.val = data
+	} else {
+		c.val, c.err = fn()
+		expire := time.Duration(0)
+		if c.val == nil {
+			g.cache.Set(key, EmptyMark, EmptyMarkExpireTime)
+		} else {
+			if len(expireTime) > 0 {
+				expire = expireTime[0]
+			}
+			g.Set(key, c.val, expire)
 		}
-		return data, nil
 	}
 
-	g.mw[key] = &sync.WaitGroup{}
-	g.mw[key].Add(1)
+	// 数据获取完毕，结束
+	c.waitGroup.Done()
 
-	data, err := fn()
-	if len(expireTime) > 0 {
-		expire = expireTime[0]
-	}
-	if err != nil || data == nil {
-		g.cache.Set(key, EmptyMark, EmptyMarkExpireTime)
-	}
-	g.Set(key, data, expire)
-	g.m[key].Unlock()
-	g.mw[key].Done()
-
-	// 移除锁
+	// 移除map数据，这里不用担心，因为如果有后续请求，会从头走流程，不影响获取
 	g.lock.Lock()
-	delete(g.m, key)
-	delete(g.mw, key)
+	delete(g.data, key)
 	g.lock.Unlock()
 
-	return data, err
+	return c.val, c.err
 }
 
 // 包装一层set
@@ -78,7 +89,7 @@ func (g *Group) Get(key string, fn func() (interface{}, error), expireTime ...ti
 	data, err := g.Do(key, fn, expireTime...)
 
 	// 先判断是否为空数据标记
-	if s, ok := data.(string); ok && s == EmptyMark {
+	if s, ok := data.(emptyType); ok && s == EmptyMark {
 		return nil, false
 	}
 
