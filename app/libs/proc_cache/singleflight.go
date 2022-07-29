@@ -3,6 +3,8 @@
 package proc_cache
 
 import (
+	"context"
+	"gin_template/app/libs"
 	"github.com/patrickmn/go-cache"
 	"sync"
 	"time"
@@ -10,7 +12,7 @@ import (
 
 const (
 	EmptyMark           emptyType = "*"
-	EmptyMarkExpireTime           = time.Second * 60 * 1
+	EmptyMarkExpireTime           = time.Second * 5 * 1
 )
 
 type (
@@ -55,7 +57,18 @@ func (g *Group) Do(key string, fn func() (interface{}, error), expireTime ...tim
 	if data, ok := g.cache.Get(key); ok {
 		c.val = data
 	} else {
-		c.val, c.err = fn()
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+		ch := make(chan int)
+		libs.RunSafe(func() {
+			c.val, c.err = fn()
+			ch <- 1
+		})
+		select {
+		case <-ch:
+		case <-ctx.Done():
+		}
+		cancel()
+
 		expire := time.Duration(0)
 		if c.val == nil {
 			g.cache.Set(key, EmptyMark, EmptyMarkExpireTime)
