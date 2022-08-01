@@ -29,7 +29,10 @@ func Success(ctx *gin.Context, data interface{}) {
 }
 
 func Error(ctx *gin.Context, err error, code ...int) {
-	customErr := err.(serror.Error)
+	customErr, ok := err.(serror.Error)
+	if !ok {
+		customErr = serror.NewErr().SetErr(err)
+	}
 
 	r := &Reply{
 		Msg: customErr.Msg(),

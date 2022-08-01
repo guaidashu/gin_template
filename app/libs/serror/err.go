@@ -58,6 +58,7 @@ func (e *defaultErr) SetErr(value interface{}) Error {
 	// 这里要考虑到多层的问题
 	tmpErr, ok := value.(Error)
 	if !ok {
+		e.msg = fmt.Sprintf("%v", value)
 		e.errMsg = append(e.errMsg, fmt.Sprintf("%s: %v", getCaller(value), value))
 		return e
 	}
