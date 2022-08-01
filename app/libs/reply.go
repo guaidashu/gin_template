@@ -83,3 +83,31 @@ func CustomReply(ctx *gin.Context, code int, msg string, err string, data ...int
 	ctx.JSON(http.StatusOK, r)
 	ctx.Abort()
 }
+
+// 某些地方可能需要直接获取到回复结构体， 比如websocket
+func GetSuccessReply(data interface{}) *Reply {
+	return &Reply{
+		Code: 0,
+		Msg:  "",
+		Data: data,
+	}
+}
+
+func GetErrorReply(err error, code ...int) *Reply {
+	customErr, ok := err.(serror.Error)
+	if !ok {
+		customErr = serror.NewErr().SetErr(err)
+	}
+
+	r := &Reply{
+		Msg: customErr.Msg(),
+		Err: customErr.ErrMsg(),
+	}
+	if len(code) > 0 {
+		r.Code = code[0]
+	} else {
+		r.Code = 1
+	}
+
+	return r
+}
