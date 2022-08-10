@@ -122,7 +122,7 @@ func (model *defaultUserModel) Update(userModel *UserModel) error {
 	key := fmt.Sprintf("%s%d", userCacheKey, userModel.UserId)
 
 	// 先转换为更新map
-	update, err := struct2Map(userModel, nil)
+	update, err := struct2Map(userModel, nil, nil)
 	if err != nil {
 		err = serror.NewErr().SetErr(err)
 		return err

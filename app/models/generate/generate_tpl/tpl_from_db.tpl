@@ -91,7 +91,7 @@ func (model *defaultTemplateModel) Update(templateModel *TemplateModel) error {
 	key := fmt.Sprintf("%s%d", templateCacheKey, templateModel.Id)
 
 	// 先转换为更新map
-	update, err := struct2Map(templateModel, nil)
+	update, err := struct2Map(templateModel, nil, nil)
 	if err != nil {
 		err = serror.NewErr().SetErr(err)
 		return err

@@ -114,7 +114,7 @@ func (model *defaultManageUserModel) Update(manageUserModel *ManageUserModel) er
 	key := fmt.Sprintf("%s%d", manageUserCacheKey, manageUserModel.ManageUserId)
 
 	// 先转换为更新map
-	update, err := struct2Map(manageUserModel, nil)
+	update, err := struct2Map(manageUserModel, nil, nil)
 	if err != nil {
 		err = serror.NewErr().SetErr(err)
 		return err

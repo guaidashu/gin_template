@@ -140,22 +140,39 @@ func queryAutoWhere(db *gorm.DB, search interface{}, separate ...map[string]sepa
 	return db, err
 }
 
+// 获取可以赋空值的字段 map，用于完善 struct2Map
+func NewExcept(list ...string) map[string]int64 {
+	m := make(map[string]int64)
+	for _, v := range list {
+		m[v] = 1
+	}
+
+	return m
+}
+
 type Struct2MapValue struct {
 	Value reflect.Value
 	Type  reflect.Type
 }
 
 // 字段tag 加上 s2s:"-" 则会被忽略
+// 成员属性必须带有 json tag标签才能获取
 // 例:
 // type structToMap struct {
 //	   Data int64 `json:"data" struct2map:"-"`
 // }
+// except: 可以赋空值的字段， 通过 NewExcept 获取(参数是定义的成员名，不是tag名，需要注意)
+// 样例：result, err := struct2Map(data, NewExcept("DataString"), nil)
 // 从结构体转为 map (适用于 数据库更新数据)
-func struct2Map(v interface{}, maps map[string]interface{}, originValue ...Struct2MapValue) (data map[string]interface{}, err error) {
+func struct2Map(v interface{}, except map[string]int64, maps map[string]interface{}, originValue ...Struct2MapValue) (data map[string]interface{}, err error) {
 	var (
 		vt  reflect.Type
 		val reflect.Value
 	)
+
+	if except == nil {
+		except = make(map[string]int64)
+	}
 
 	if maps != nil {
 		data = maps
@@ -193,18 +210,24 @@ func struct2Map(v interface{}, maps map[string]interface{}, originValue ...Struc
 
 		fieldName := vt.Field(i).Tag.Get("json")
 		if fieldName == "" {
-			data, _ = struct2Map(val.Field(i), data, Struct2MapValue{
+			data, _ = struct2Map(val.Field(i), except, data, Struct2MapValue{
 				Value: val.Field(i),
 				Type:  vt.Field(i).Type,
 			})
 			continue
 		}
 
+		_, ok := except[vt.Field(i).Name]
 		switch val.Field(i).Type().String() {
 		case "string":
-			if val.Field(i).String() != "" {
+			if val.Field(i).String() != "" || ok {
 				data[fieldName] = val.Field(i).String()
 			}
+		case "*string":
+			if val.Field(i).IsNil() {
+				continue
+			}
+			data[fieldName] = val.Field(i).Elem().String()
 
 		case "*int64", "*int32", "*int16", "*int8", "*int":
 			if val.Field(i).IsNil() {
@@ -219,16 +242,25 @@ func struct2Map(v interface{}, maps map[string]interface{}, originValue ...Struc
 			data[fieldName] = val.Field(i).Elem().Uint()
 
 		case "uint64", "uint32", "uint16", "uint8", "uint":
-			if val.Field(i).Uint() > 0 {
+			if val.Field(i).Uint() != 0 || ok {
 				data[fieldName] = val.Field(i).Uint()
 			}
 
 		case "int64", "int32", "int16", "int8", "int":
-			if val.Field(i).Int() > 0 {
+			if val.Field(i).Int() != 0 || ok {
 				data[fieldName] = val.Field(i).Int()
 			}
+		case "float64", "float32":
+			if val.Field(i).Float() != 0 || ok {
+				data[fieldName] = val.Field(i).Float()
+			}
+		case "*float64", "*float32":
+			if val.Field(i).IsNil() {
+				continue
+			}
+			data[fieldName] = val.Field(i).Elem().Float()
 		default:
-			data, _ = struct2Map(val.Field(i), data, Struct2MapValue{
+			data, _ = struct2Map(val.Field(i), except, data, Struct2MapValue{
 				Value: val.Field(i),
 				Type:  vt.Field(i).Type,
 			})
