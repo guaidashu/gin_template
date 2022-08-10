@@ -7,26 +7,26 @@ package router
 import (
 	"fmt"
 	"gin_template/app/controller"
-	"gin_template/app/ginServer"
+	"gin_template/app/gin_server"
 )
 
 func init() {
 	fmt.Println("开始初始化router")
 
 	// 添加 html template
-	// ginServer.LoadHTMLGlob("app/views/**/*")
+	// gin_server.LoadHTMLGlob("app/views/**/*")
 
 	// 添加 静态资源路由
-	// ginServer.StaticFS("/asset", http.Dir("app/asset"))
+	// gin_server.StaticFS("/asset", http.Dir("app/asset"))
 
 	// 开启跨域
-	// ginServer.Router.Use(middlewares.Cors())
-	test := ginServer.Group("/test")
+	// gin_server.Router.Use(middlewares.Cors())
+	test := gin_server.Group("/test")
 	{
 		test.GET("/", controller.Test)
 	}
-	ginServer.GET("/", controller.Index)
-	ginServer.GET("/index", controller.Index)
-	ginServer.GET("/init_table", controller.InitTables)
+	gin_server.GET("/", controller.Index)
+	gin_server.GET("/index", controller.Index)
+	gin_server.GET("/init_table", controller.InitTables)
 	fmt.Println("router初始化成功")
 }

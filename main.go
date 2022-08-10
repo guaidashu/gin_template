@@ -5,11 +5,11 @@
 package main
 
 import (
-	"gin_template/app/ginServer"
+	"gin_template/app/gin_server"
 	_ "gin_template/app/init"
 	_ "gin_template/app/router"
 )
 
 func main() {
-	ginServer.Run()
+	gin_server.Run()
 }
