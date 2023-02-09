@@ -8,10 +8,41 @@ import (
 	"errors"
 	"fmt"
 	"gin_template/app/config"
+	"gin_template/app/data_struct/_interface"
+	"gin_template/app/enum"
 	"gin_template/app/libs"
 	"github.com/guaidashu/go_mongodb_yy"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+type (
+	MDBInit struct{}
+)
+
+func NewMDBInit() *MDBInit {
+	return &MDBInit{}
+}
+
+func (m *MDBInit) Init(*_interface.ServiceParam) error {
+	InitMongoDB()
+	return nil
+}
+
+func (m *MDBInit) ComponentName() enum.BootModuleType {
+	return enum.MongoInit
+}
+
+func (m *MDBInit) Close() error {
+	if MDB != nil {
+		libs.Logger.Info("Close MDB")
+		if err := MDB.Close(); err != nil {
+			libs.Logger.Info("Close MDB failed, error: %v", err)
+			return nil
+		}
+	}
+
+	return nil
+}
 
 var MDB *go_mongodb_yy.MDBPool
 

@@ -9,9 +9,9 @@ import (
 	"errors"
 	"fmt"
 	"gin_template/app/config"
+	"gin_template/app/enum"
+	"gin_template/app/init"
 	"gin_template/app/libs"
-	"gin_template/app/models"
-	mq "gin_template/app/mq/kafka"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -29,10 +29,21 @@ func init() {
 }
 
 func closeEnv() {
-	// 关闭数据库
-	models.CloseDB()
-	// 关闭kafka consumer和producer
-	mq.Kafka.Stop()
+	initModules := init.InitModules()
+	initModuleTemp := make(map[enum.BootModuleType]struct{})
+	for _, moduleType := range initModules {
+		initModuleTemp[moduleType] = struct{}{}
+	}
+
+	// 初始化各种组件
+	for _, v := range init.InitList() {
+		if _, ok := initModuleTemp[v.ComponentName()]; ok {
+			err := v.Close()
+			if err != nil {
+				libs.Logger.Panic(fmt.Sprintf("%v: Close失败, err: %v", v.ComponentName(), err))
+			}
+		}
+	}
 }
 
 func Run(addr ...string) {

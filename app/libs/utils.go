@@ -13,6 +13,7 @@ import (
 	"reflect"
 	"runtime"
 	"strings"
+	"unsafe"
 )
 
 func GetErrorString(err error) string {
@@ -130,4 +131,18 @@ func Struct2Map(v interface{}, maps map[string]interface{}, originValue ...Struc
 func GenerateDataId() string {
 	id := bson.NewObjectId().Hex()
 	return id
+}
+
+// 以下两个函数，建议在做高频转换且不做修改的情况下使用
+
+// bytes转string，不做内存拷贝，二者共用同一份内存数据（转换后修改bytes里面的内容，string同时会做修改）
+func Bytes2String(b []byte) string {
+	return *(*string)(unsafe.Pointer(&b))
+}
+
+// string转bytes，不做内存拷贝，二者共用同一份内存数据（转换后修改bytes里面的内容会panic）
+func String2Bytes(s string) []byte {
+	x := (*[2]uintptr)(unsafe.Pointer(&s))
+	h := [3]uintptr{x[0], x[1], x[1]}
+	return *(*[]byte)(unsafe.Pointer(&h))
 }

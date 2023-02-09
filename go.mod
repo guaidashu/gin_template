@@ -11,14 +11,15 @@ require (
 	github.com/guaidashu/go_mongodb_yy v0.0.0-20191022125728-322d2a848ba9
 	github.com/jinzhu/gorm v1.9.10
 	github.com/jinzhu/now v1.1.1
+	github.com/magiconair/properties v1.8.7 // indirect
+	github.com/nacos-group/nacos-sdk-go/v2 v2.1.3 // indirect
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/segmentio/kafka-go v0.4.17
 	github.com/shopspring/decimal v1.3.1
 	github.com/tidwall/pretty v1.0.2 // indirect
-	go.mongodb.org/mongo-driver v1.1.2
-	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
-	golang.org/x/net v0.0.0-20191021144547-ec77196f6094 // indirect
-	golang.org/x/sys v0.0.0-20191022100944-742c48ecaeb7 // indirect
+	github.com/young2j/gocopy v1.1.13 // indirect
+	go.mongodb.org/mongo-driver v1.8.2
+	golang.org/x/crypto v0.0.0-20201216223049-8b5274cf687f
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 )

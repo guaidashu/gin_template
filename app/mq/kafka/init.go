@@ -5,13 +5,14 @@
  * @Desc: desc
  */
 
-package mq
+package kafka
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"gin_template/app/config"
+	"gin_template/app/data_struct/_interface"
 	"gin_template/app/enum"
 	"gin_template/app/libs"
 )
@@ -23,7 +24,27 @@ type (
 		producers map[string]*Producer
 		consumers map[string]*Consumer
 	}
+
+	KqInit struct{}
 )
+
+func NewKqInit() *KqInit {
+	return &KqInit{}
+}
+
+func (k *KqInit) Init(*_interface.ServiceParam) error {
+	InitKafka()
+	return nil
+}
+
+func (k *KqInit) ComponentName() enum.BootModuleType {
+	return enum.KafkaInit
+}
+
+func (k *KqInit) Close() error {
+	Kafka.Stop()
+	return nil
+}
 
 func InitKafka() {
 	Kafka = NewKq()

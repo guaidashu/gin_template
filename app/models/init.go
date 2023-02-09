@@ -7,9 +7,10 @@ package models
 import (
 	"fmt"
 	"gin_template/app/config"
+	"gin_template/app/data_struct/_interface"
+	"gin_template/app/enum"
 	"gin_template/app/libs"
 	"gin_template/app/mongodb"
-	"gin_template/app/rds"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -17,6 +18,39 @@ import (
 
 var GDB *gorm.DB
 var PDB *gorm.DB
+
+type (
+	MysqlInit struct{}
+	PsqlInit  struct{}
+)
+
+func NewMysqlInit() *MysqlInit {
+	return &MysqlInit{}
+}
+
+func NewPsqlInit() *PsqlInit {
+	return &PsqlInit{}
+}
+
+func (m *MysqlInit) Init(*_interface.ServiceParam) error {
+	return InitDB()
+}
+
+func (m *MysqlInit) ComponentName() enum.BootModuleType {
+	return enum.MysqlInit
+}
+
+func (m *MysqlInit) Close() error {
+	if GDB != nil {
+		libs.Logger.Info("Close Mysql")
+		if err := GDB.Close(); err != nil {
+			libs.Logger.Error("Close Mysql failed, error: %v", err)
+			return err
+		}
+	}
+
+	return nil
+}
 
 func InitDB() error {
 	db, err := getDB()
@@ -27,6 +61,26 @@ func InitDB() error {
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
 		return "table_" + defaultTableName
 	}
+	return nil
+}
+
+func (p *PsqlInit) Init(*_interface.ServiceParam) error {
+	return InitPostGreDB()
+}
+
+func (p *PsqlInit) ComponentName() enum.BootModuleType {
+	return enum.PsqlInit
+}
+
+func (p *PsqlInit) Close() error {
+	if PDB != nil {
+		libs.Logger.Info("Close Postgresql.")
+		if err := PDB.Close(); err != nil {
+			libs.Logger.Error("Close Postgresql failed, error: %v", err)
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -96,26 +150,6 @@ func CreateTable() {
 
 func CloseDB() {
 	var err error
-	if PDB != nil {
-		libs.Logger.Info("Close Postgresql.")
-		if err = PDB.Close(); err != nil {
-			libs.Logger.Error("Close Postgresql failed, error: %v", err)
-		}
-	}
-
-	if GDB != nil {
-		libs.Logger.Info("Close Mysql")
-		if err = GDB.Close(); err != nil {
-			libs.Logger.Error("Close Mysql failed, error: %v", err)
-		}
-	}
-
-	if rds.Redis != nil {
-		libs.Logger.Info("Close rds")
-		if err = rds.Redis.Close(); err != nil {
-			libs.Logger.Info("Close rds failed, error: %v", err)
-		}
-	}
 
 	if mongodb.MDB != nil {
 		libs.Logger.Info("Close Mongodb")

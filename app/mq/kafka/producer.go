@@ -5,7 +5,7 @@
  * @Desc: kafka producer
  */
 
-package mq
+package kafka
 
 import (
 	"context"

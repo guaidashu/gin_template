@@ -5,7 +5,7 @@
  * @Desc: kafka consumer
  */
 
-package mq
+package kafka
 
 import (
 	"github.com/segmentio/kafka-go"

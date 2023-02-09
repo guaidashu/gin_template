@@ -6,10 +6,10 @@ import (
 	"time"
 )
 
-var Cache *Group
+var ProcCache *Group
 
 func init() {
-	Cache = &Group{
+	ProcCache = &Group{
 		cache: cache.New(5*time.Minute, 10*time.Minute),
 		lock:  sync.Mutex{},
 		data:  make(map[string]*cacheData),

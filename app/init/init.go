@@ -8,46 +8,61 @@ import (
 	"fmt"
 	"gin_template/app/config"
 	_ "gin_template/app/config"
+	"gin_template/app/data_struct/_interface"
+	"gin_template/app/enum"
 	"gin_template/app/libs"
 	"gin_template/app/models"
-	"log"
+	"gin_template/app/mongodb"
+	"gin_template/app/mq/kafka"
+	"gin_template/app/nacos"
+	"gin_template/app/rds"
+	"math/rand"
+	"time"
 )
 
 func init() {
+	// 设置随机种子
+	rand.Seed(time.Now().UnixNano())
+
+	// 初始化配置文件，如果走的是配置文件的话
 	config.InitConf()
-	// 初始化日志
-	err, _ := libs.InitLogger()
-	if err != nil {
-		log.Println(fmt.Sprintf("init logger failed, error: %v", libs.NewReportError(err)))
-		return
-	}
-	libs.Logger.Info("======= 初始化日志系统 ======")
-	// 初始化redis
-	// libs.Logger.Info("====== 初始化redis系统 ======")
-	// err = rds.InitRedis()
-	// if err != nil {
-	// 	libs.Logger.Info(fmt.Sprintf("init rds failed, error: %v", libs.NewReportError(err)))
-	// }
-	// 初始化mysql
-	libs.Logger.Info("====== 初始化mysql系统 ======")
-	err = models.InitDB()
-	if err != nil {
-		libs.Logger.Info(fmt.Sprintf("init db failed, error: %v", libs.NewReportError(err)))
+
+	initModules := InitModules()
+	initModuleTemp := make(map[enum.BootModuleType]struct{})
+	for _, moduleType := range initModules {
+		initModuleTemp[moduleType] = struct{}{}
 	}
 
-	// 初始化postgresql系统
-	// libs.Logger.Info("====== 初始化postgresql系统 ======")
-	// err = models.InitPostGreDB()
-	// if err != nil {
-	// 	libs.Logger.Info(fmt.Sprintf("init db failed, error: %v", libs.NewReportError(err)))
-	// }
+	// 初始化各种组件
+	for _, v := range InitList() {
+		if _, ok := initModuleTemp[v.ComponentName()]; ok {
+			err := v.Init(&_interface.ServiceParam{})
+			if err != nil {
+				libs.Logger.Panic(fmt.Sprintf("%v: 初始化失败, err: %v", v.ComponentName(), err))
+			}
+		}
+	}
+
 	// 自动建表(目前仅针对于 mysql 和 postgresql 可开启此功能)， 或者通过 router里配置的init_table 可视化访问来创建
 	// models.CreateTable()
+}
 
-	// 初始化mongodb
-	// libs.Logger.Info("====== 初始化mongodb系统 ======")
-	// mongodb.InitMongoDB()
+func InitList() []_interface.ComponentsInit {
+	// nacos必须放在第一位
+	return []_interface.ComponentsInit{
+		nacos.NewNacosInit(),
+		rds.NewRedisInit(),
+		models.NewMysqlInit(),
+		models.NewPsqlInit(),
+		kafka.NewKqInit(),
+		mongodb.NewMDBInit(),
+	}
+}
 
-	// 初始化 kafka
-	// mq.InitKafka()
+func InitModules() []enum.BootModuleType {
+	return []enum.BootModuleType{
+		enum.NacosInit,
+		enum.RedisInit,
+		enum.MysqlInit,
+	}
 }

@@ -6,7 +6,6 @@ package libs
 
 import (
 	"fmt"
-	"gin_template/app/config"
 	"github.com/op/go-logging"
 	"io"
 	"os"
@@ -14,10 +13,10 @@ import (
 
 var Logger *logging.Logger
 
-func InitLogger() (error, string) {
-	ok, _ := PathExists(config.Config.App.LogDir)
+func InitLogger(logDir string) (error, string) {
+	ok, _ := PathExists(logDir)
 	if !ok {
-		err := os.MkdirAll(config.Config.App.LogDir, 0777)
+		err := os.MkdirAll(logDir, 0777)
 		if err != nil {
 			return err, fmt.Sprintf("mkdir failed, error: %v", err)
 		}
@@ -25,7 +24,7 @@ func InitLogger() (error, string) {
 	LogFormat := "%{color}%{level:.4s}:%{time:2006-01-02 15:04:05.000}[%{id:03x}] %{shortfile} %{color:reset} %{message}"
 	Logger = logging.MustGetLogger("")
 	logFile := GetNowTimeMon(GetNowTimeStamp()) + ".log"
-	writeFd, err := os.OpenFile(config.Config.App.LogDir+"/"+logFile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+	writeFd, err := os.OpenFile(logDir+"/"+logFile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 	if err != nil {
 		fmt.Println()
 		return err, fmt.Sprintf("open file[%s] failed[%s]", logFile, err)
