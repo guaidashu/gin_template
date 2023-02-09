@@ -6,7 +6,6 @@ package init
 
 import (
 	"fmt"
-	"gin_template/app/config"
 	_ "gin_template/app/config"
 	"gin_template/app/data_struct/_interface"
 	"gin_template/app/enum"
@@ -25,7 +24,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 
 	// 初始化配置文件，如果走的是配置文件的话
-	config.InitConf()
+	// config.InitConf()
 
 	err, _ := libs.InitLogger("logs")
 	if err != nil {

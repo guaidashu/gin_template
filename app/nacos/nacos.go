@@ -34,6 +34,22 @@ func GetPropertiesConfig(dataId, group string, data interface{}, isAutoListen ..
 	return GetPropertiesConfigByNamespace(dataId, group, DefaultNamespace, data, isAutoListen...)
 }
 
+// 一体化获取配置和监听等
+// 此方法传入一个 变量指针(data) 具体用法见 nacos_test.go TestGetYamlConfig方法
+//
+// dataId 相当于 etcd的key
+// group 是分组ID，以服务块划分，可自定义
+// isAutoListen 为是否自动监听，默认是会监听，传入false则不监听
+//
+// 调用此方法后会自动发起一个监听协程
+// 配置发生改变时，会自动更新传入指针地址对应的值，所以不需要另外启动监听程序
+// 除非有其他监听操作，否则不需要调用 ListenConfig 方法
+//
+// data 必须传入指针,具体用法见 nacos_test.go TestYamlConfig方法
+func GetYamlConfig(dataId, group string, data interface{}, isAutoListen ...bool) error {
+	return GetYamlConfigByNamespace(dataId, group, DefaultNamespace, data, isAutoListen...)
+}
+
 // 发布配置
 // dataId 相当于 etcd的key
 // group 是分组ID，以服务块划分，可自定义

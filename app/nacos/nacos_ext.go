@@ -2,6 +2,7 @@ package nacos
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"gin_template/app/libs"
@@ -269,6 +270,69 @@ func listenPropertiesConfigByNamespace(dataId, group, namespace string, data int
 		p := properties.MustLoadString(callbackData)
 		m := p.Map()
 		gocopy.Copy(data, &m)
+	})
+	if err != nil {
+		libs.Logger.Error("Nacos监听配置失败")
+		return
+	}
+}
+
+func GetYamlConfigByNamespace(dataId, group, namespace string, data interface{}, isAutoListen ...bool) error {
+	isListen := false
+
+	lock.Lock()
+	defer func() {
+		_ = recover()
+		lock.Unlock()
+	}()
+	if _, ok := NacosConfigMap[group]; !ok {
+		NacosConfigMap[group] = make(map[string]*NacosConfigStore)
+	}
+
+	if _, ok := NacosConfigMap[group][dataId]; !ok {
+		NacosConfigMap[group][dataId] = &NacosConfigStore{}
+
+		if len(isAutoListen) > 0 {
+			isListen = isAutoListen[0]
+		}
+		// 发起监听
+		if isListen {
+			libs.RunSafe(func() {
+				listenYamlConfigByNamespace(dataId, group, namespace, data)
+			})
+		}
+	}
+
+	content, err := NacosClient[namespace].GetConfig(dataId, group)
+	if err != nil {
+		libs.Logger.Error("Nacos配置数据获取失败")
+		return err
+	}
+
+	err = xml.Unmarshal([]byte(content), data)
+
+	return err
+}
+
+
+func listenYamlConfigByNamespace(dataId, group, namespace string, data interface{}) {
+	defer func() {
+		rcv := recover()
+		if rcv != nil {
+			libs.Logger.Error(fmt.Sprintf("自动监听配置panic, recover error: %v", rcv))
+		}
+	}()
+
+	err := NacosClient[namespace].ListenConfig(dataId, group, func(namespace, callbackGroupId, callbackDataId, callbackData string) {
+		if !(callbackGroupId == group && callbackDataId == dataId) {
+			return
+		}
+
+		e := xml.Unmarshal([]byte(callbackData), data)
+		if e != nil {
+			libs.Logger.Error("Nacos监听配置失败")
+			return
+		}
 	})
 	if err != nil {
 		libs.Logger.Error("Nacos监听配置失败")

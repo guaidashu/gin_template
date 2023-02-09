@@ -6,6 +6,9 @@ package config
 
 import (
 	"fmt"
+	"gin_template/app/data_struct/_interface"
+	"gin_template/app/enum"
+	"gin_template/app/nacos"
 	"github.com/guaidashu/go_helper/configor"
 	"log"
 	"os"
@@ -83,6 +86,26 @@ type KafkaConf struct {
 	Hosts []string `json:"hosts"`
 }
 
+type (
+	ConfigInit struct{}
+)
+
+func NewConfigInit() *ConfigInit {
+	return &ConfigInit{}
+}
+
+func (c ConfigInit) Init(params *_interface.ServiceParam) error {
+	return InitFromNacos()
+}
+
+func (c ConfigInit) ComponentName() enum.BootModuleType {
+	return enum.ConfigInit
+}
+
+func (c ConfigInit) Close() error {
+	return nil
+}
+
 var Config CustomConfig
 
 func InitConf() {
@@ -158,4 +181,14 @@ func InitConfForTest(conf string) {
 	} else {
 		fmt.Println("配置文件加载完成")
 	}
+}
+
+// 从nacos读取配置
+func InitFromNacos() error {
+	err := nacos.GetYamlConfig("config", "env", &Config, false)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
