@@ -314,7 +314,6 @@ func GetYamlConfigByNamespace(dataId, group, namespace string, data interface{},
 	return err
 }
 
-
 func listenYamlConfigByNamespace(dataId, group, namespace string, data interface{}) {
 	defer func() {
 		rcv := recover()
