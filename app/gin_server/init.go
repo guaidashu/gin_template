@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"gin_template/app/config"
 	"gin_template/app/enum"
-	"gin_template/app/init"
+	init_components "gin_template/app/init"
 	"gin_template/app/libs"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -29,14 +29,14 @@ func init() {
 }
 
 func closeEnv() {
-	initModules := init.InitModules()
+	initModules := init_components.InitModules()
 	initModuleTemp := make(map[enum.BootModuleType]struct{})
 	for _, moduleType := range initModules {
 		initModuleTemp[moduleType] = struct{}{}
 	}
 
 	// 初始化各种组件
-	for _, v := range init.InitList() {
+	for _, v := range init_components.InitList() {
 		if _, ok := initModuleTemp[v.ComponentName()]; ok {
 			err := v.Close()
 			if err != nil {

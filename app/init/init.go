@@ -27,6 +27,11 @@ func init() {
 	// 初始化配置文件，如果走的是配置文件的话
 	config.InitConf()
 
+	err, _ := libs.InitLogger("logs")
+	if err != nil {
+		panic("初始化日志系统失败")
+	}
+
 	initModules := InitModules()
 	initModuleTemp := make(map[enum.BootModuleType]struct{})
 	for _, moduleType := range initModules {
