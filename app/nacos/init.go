@@ -2,6 +2,8 @@ package nacos
 
 import (
 	"errors"
+	"fmt"
+	"gin_template/app/config"
 	"gin_template/app/data_struct/_interface"
 	"gin_template/app/enum"
 	"os"
@@ -48,6 +50,37 @@ func InitNacosConfig() error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+type (
+	ConfigInit struct{}
+)
+
+func NewConfigInit() *ConfigInit {
+	return &ConfigInit{}
+}
+
+func (c ConfigInit) Init(params *_interface.ServiceParam) error {
+	return InitFromNacos()
+}
+
+func (c ConfigInit) ComponentName() enum.BootModuleType {
+	return enum.ConfigInit
+}
+
+func (c ConfigInit) Close() error {
+	return nil
+}
+
+// 从nacos读取配置
+func InitFromNacos() error {
+	err := GetYamlConfig("config", "env", &config.Config, false)
+	if err != nil {
+		return err
+	}
+	fmt.Println(config.Config)
 
 	return nil
 }

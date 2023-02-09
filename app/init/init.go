@@ -6,8 +6,6 @@ package init
 
 import (
 	"fmt"
-	"gin_template/app/config"
-	_ "gin_template/app/config"
 	"gin_template/app/data_struct/_interface"
 	"gin_template/app/enum"
 	"gin_template/app/libs"
@@ -56,7 +54,7 @@ func InitList() []_interface.ComponentsInit {
 	// nacos必须放在第一位
 	return []_interface.ComponentsInit{
 		nacos.NewNacosInit(),
-		config.NewConfigInit(),
+		nacos.NewConfigInit(),
 		rds.NewRedisInit(),
 		models.NewMysqlInit(),
 		models.NewPsqlInit(),

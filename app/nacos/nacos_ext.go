@@ -2,10 +2,10 @@ package nacos
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"errors"
 	"fmt"
 	"gin_template/app/libs"
+	"github.com/guaidashu/go_helper/yaml"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/magiconair/properties"
 	"github.com/nacos-group/nacos-sdk-go/v2/model"
@@ -309,7 +309,7 @@ func GetYamlConfigByNamespace(dataId, group, namespace string, data interface{},
 		return err
 	}
 
-	err = xml.Unmarshal([]byte(content), data)
+	err = yaml.Unmarshal([]byte(content), data)
 
 	return err
 }
@@ -328,7 +328,7 @@ func listenYamlConfigByNamespace(dataId, group, namespace string, data interface
 			return
 		}
 
-		e := xml.Unmarshal([]byte(callbackData), data)
+		e := yaml.Unmarshal([]byte(callbackData), data)
 		if e != nil {
 			libs.Logger.Error("Nacos监听配置失败")
 			return
