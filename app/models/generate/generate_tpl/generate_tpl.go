@@ -62,7 +62,7 @@ func GenerateTpl(table Table, fields []Field) {
 	tableName := table.Name
 	// 检测表是否存在
 	if models.GDB != nil {
-		isExist = models.GDB.HasTable(tableName)
+		isExist = models.GDB.Migrator().HasTable(tableName)
 	}
 	if isExist {
 		path = "./generate_tpl/tpl_from_db.tpl"

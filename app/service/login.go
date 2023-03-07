@@ -19,7 +19,7 @@ import (
 	"gin_template/app/models"
 	jwt2 "github.com/dgrijalva/jwt-go"
 	"github.com/guaidashu/go_helper/crypto_tool"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"sync"
 	"time"
 )

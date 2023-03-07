@@ -5,7 +5,7 @@ import (
 	"gin_template/app/libs/serror"
 	"sync"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 var (
@@ -79,12 +79,12 @@ func (model *defaultUserModel) TableName() string {
 }
 
 func (model *defaultUserModel) HasTable() bool {
-	return GDB.HasTable(model.TableName())
+	return GDB.Migrator().HasTable(model.TableName())
 }
 
 func (model *defaultUserModel) CreateTable() error {
 	db := model.getDB()
-	err := db.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(&UserModel{}).Error
+	err := db.Set("gorm:table_options", "ENGINE=InnoDB").Migrator().CreateTable(&UserModel{})
 	if err != nil {
 		return err
 	}

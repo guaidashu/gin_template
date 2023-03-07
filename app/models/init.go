@@ -11,25 +11,19 @@ import (
 	"gin_template/app/enum"
 	"gin_template/app/libs"
 	"gin_template/app/mongodb"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/plugin/dbresolver"
 )
 
 var GDB *gorm.DB
-var PDB *gorm.DB
 
 type (
 	MysqlInit struct{}
-	PsqlInit  struct{}
 )
 
 func NewMysqlInit() *MysqlInit {
 	return &MysqlInit{}
-}
-
-func NewPsqlInit() *PsqlInit {
-	return &PsqlInit{}
 }
 
 func (m *MysqlInit) Init(*_interface.ServiceParam) error {
@@ -43,7 +37,13 @@ func (m *MysqlInit) ComponentName() enum.BootModuleType {
 func (m *MysqlInit) Close() error {
 	if GDB != nil {
 		libs.Logger.Info("Close Mysql")
-		if err := GDB.Close(); err != nil {
+
+		db, err := GDB.DB()
+		if err != nil {
+			return err
+		}
+
+		if err = db.Close(); err != nil {
 			libs.Logger.Error("Close Mysql failed, error: %v", err)
 			return err
 		}
@@ -58,55 +58,8 @@ func InitDB() error {
 		return err
 	}
 	GDB = db
-	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
-		return "table_" + defaultTableName
-	}
-	return nil
-}
-
-func (p *PsqlInit) Init(*_interface.ServiceParam) error {
-	return InitPostGreDB()
-}
-
-func (p *PsqlInit) ComponentName() enum.BootModuleType {
-	return enum.PsqlInit
-}
-
-func (p *PsqlInit) Close() error {
-	if PDB != nil {
-		libs.Logger.Info("Close Postgresql.")
-		if err := PDB.Close(); err != nil {
-			libs.Logger.Error("Close Postgresql failed, error: %v", err)
-			return err
-		}
-	}
 
 	return nil
-}
-
-func InitPostGreDB() error {
-	db, err := getPostGreDB()
-	if err != nil {
-		return err
-	}
-	PDB = db
-	return nil
-}
-
-func getPostGreDB() (*gorm.DB, error) {
-	connect := fmt.Sprintf("host=%v user=%v dbname=%v sslmode=disable password=%v",
-		config.Config.PostGreSql.Host,
-		config.Config.PostGreSql.Username,
-		config.Config.PostGreSql.Database,
-		config.Config.PostGreSql.Password,
-	)
-	db, err := gorm.Open("postgres", connect)
-	if err != nil {
-		return nil, err
-	}
-	db.DB().SetMaxIdleConns(config.Config.PostGreSql.PoolSize / 2)
-	db.DB().SetMaxOpenConns(config.Config.PostGreSql.PoolSize)
-	return db, nil
 }
 
 func getDB() (*gorm.DB, error) {
@@ -117,17 +70,23 @@ func getDB() (*gorm.DB, error) {
 		config.Config.Mysql.DbHost,
 		config.Config.Mysql.DbPort,
 		config.Config.Mysql.Database)
-	db, err := gorm.Open("mysql", connect)
+	db, err := gorm.Open(mysql.Open(connect), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
-	db.DB().SetMaxIdleConns(config.Config.Mysql.DbPoolSize / 2)
-	db.DB().SetMaxOpenConns(config.Config.Mysql.DbPoolSize)
+
+	err = db.Use(dbresolver.Register(dbresolver.Config{}).
+		SetMaxIdleConns(config.Config.Mysql.DbPoolSize / 2).
+		SetMaxOpenConns(config.Config.Mysql.DbPoolSize),
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	return db, nil
 }
 
 func createTable(models ...BaseModel) {
-
 	var (
 		err error
 	)

@@ -11,7 +11,7 @@ import (
 	"encoding/json"
 	"gin_template/app/rds"
 	"github.com/go-redis/redis"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"time"
 )
 

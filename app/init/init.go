@@ -57,7 +57,6 @@ func InitList() []_interface.ComponentsInit {
 		nacos.NewConfigInit(),
 		rds.NewRedisInit(),
 		models.NewMysqlInit(),
-		models.NewPsqlInit(),
 		kafka.NewKqInit(),
 		mongodb.NewMDBInit(),
 	}

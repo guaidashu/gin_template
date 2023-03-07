@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"gin_template/app/enum"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"reflect"
 )
 
