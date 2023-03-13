@@ -151,7 +151,7 @@ func getTables(tableNames string) []Table {
 // 获取所有字段信息
 func getFields(tableName string) []Field {
 	var fields []Field
-	models.GDB.Raw("show FULL COLUMNS from " + tableName + ";").Find(&fields)
+	models.GDB.Raw("show FULL COLUMNS from `" + tableName + "`;").Find(&fields)
 	return fields
 }
 
