@@ -13,15 +13,14 @@ import (
 
 type Reply struct {
 	Code int         `json:"code"`
-	Msg  string      `json:"msg"`
-	Err  interface{} `json:"err"`
-	Data interface{} `json:"data"`
+	Msg  string      `json:"msg,omitempty"`
+	Err  interface{} `json:"err,omitempty"`
+	Data interface{} `json:"data,omitempty"`
 }
 
 func Success(ctx *gin.Context, data interface{}) {
 	r := &Reply{
 		Code: 0,
-		Msg:  "",
 		Data: data,
 	}
 	ctx.JSON(http.StatusOK, r)
