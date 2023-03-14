@@ -35,12 +35,14 @@ func Error(ctx *gin.Context, err error, code ...int) {
 	}
 
 	r := &Reply{
-		Msg: customErr.Msg(),
-		Err: customErr.ErrMsg(),
+		Msg:  customErr.Msg(),
+		Err:  customErr.ErrMsg(),
+		Code: int(customErr.Code()),
 	}
 	if len(code) > 0 {
 		r.Code = code[0]
-	} else {
+	}
+	if r.Code == 0 {
 		r.Code = 1
 	}
 
