@@ -8,6 +8,7 @@
 package serror
 
 import (
+	"errors"
 	"fmt"
 	"gin_template/app/config"
 	"runtime"
@@ -51,6 +52,14 @@ func NewErr(isLog ...bool) Error {
 	}
 	return &defaultErr{
 		isLog: logFlag,
+	}
+}
+
+func NewError(code int64, msg string) Error {
+	return &defaultErr{
+		code: code,
+		msg:  msg,
+		err:  errors.New(msg),
 	}
 }
 
