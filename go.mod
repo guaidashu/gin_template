@@ -21,7 +21,7 @@ require (
 	github.com/tidwall/pretty v1.0.2 // indirect
 	github.com/young2j/gocopy v1.1.13
 	go.mongodb.org/mongo-driver v1.8.2
-	golang.org/x/crypto v0.0.0-20201216223049-8b5274cf687f
+	golang.org/x/crypto v0.1.0
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gorm.io/driver/mysql v1.4.7
 	gorm.io/gorm v1.24.6
