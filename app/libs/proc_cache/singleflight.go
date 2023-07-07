@@ -6,6 +6,7 @@ import (
 	"context"
 	"gin_template/app/libs"
 	"github.com/patrickmn/go-cache"
+	"reflect"
 	"sync"
 	"time"
 )
@@ -70,7 +71,7 @@ func (g *Group) Do(key string, fn func() (interface{}, error), expireTime ...tim
 		cancel()
 
 		expire := time.Duration(0)
-		if c.val == nil {
+		if IsNil(c.val) {
 			g.cache.Set(key, EmptyMark, EmptyMarkExpireTime)
 		} else {
 			if len(expireTime) > 0 {
@@ -116,4 +117,18 @@ func (g *Group) Get(key string, fn func() (interface{}, error), expireTime ...ti
 // 直接返回go-cache实例(为了更自由灵活的操作)
 func (g *Group) Cache() *cache.Cache {
 	return g.cache
+}
+
+// IsNil 判定各种类型是否为nil
+func IsNil(i interface{}) bool {
+	// Chan, Func, Map, Ptr, UnsafePointer,Interface, Slice
+	if i != nil {
+		vi := reflect.ValueOf(i)
+		switch vi.Kind() {
+		case reflect.Ptr, reflect.Slice, reflect.Map, reflect.Chan, reflect.Interface, reflect.Func, reflect.UnsafePointer:
+			return vi.IsNil()
+		}
+	}
+
+	return i == nil
 }

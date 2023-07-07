@@ -6,7 +6,7 @@ package libs
 
 import (
 	"errors"
-	"fmt"
+	"log"
 	"reflect"
 	"strings"
 	"time"
@@ -51,7 +51,7 @@ func RunSafe(fn func()) {
 	go func() {
 		defer func() {
 			if err := recover(); err != nil {
-				fmt.Println(err)
+				log.Println(err)
 			}
 		}()
 
