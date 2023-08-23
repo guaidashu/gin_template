@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	templateCacheKey = "template#cache#"
+	templateCacheKey = "gin_template#template#cache#"
 )
 
 type (
