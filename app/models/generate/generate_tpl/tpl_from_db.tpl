@@ -57,6 +57,7 @@ func (model *defaultTemplateModel) CreateTable() error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
