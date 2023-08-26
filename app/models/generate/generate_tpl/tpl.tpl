@@ -71,13 +71,11 @@ func (model *defaultTemplateModel) CreateTable() error {
 }
 
 // 创建数据并返回本次插入的ID
-func (model *defaultTemplateModel) Create(templateModel *TemplateModel) (Id int64, err error) {
+func (model *defaultTemplateModel) Create(templateModel *TemplateModel) (err error) {
 	db := model.getDB().Create(templateModel)
 	if err = db.Error; err != nil {
 		return
 	}
-	// 获取本次ID
-	Id = db.RowsAffected
 
 	return
 }

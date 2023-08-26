@@ -84,13 +84,11 @@ func (model *defaultManageUserModel) CreateTable() error {
 }
 
 // 创建数据并返回本次插入的ID
-func (model *defaultManageUserModel) Create(manageUserModel *ManageUserModel) (manageUserId int64, err error) {
+func (model *defaultManageUserModel) Create(manageUserModel *ManageUserModel) (err error) {
 	db := model.getDB().Create(manageUserModel)
 	if err = db.Error; err != nil {
 		return
 	}
-	// 获取本次ID
-	manageUserId = db.RowsAffected
 
 	return
 }

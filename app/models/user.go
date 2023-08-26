@@ -92,13 +92,11 @@ func (model *defaultUserModel) CreateTable() error {
 }
 
 // 创建数据并返回本次插入的ID
-func (model *defaultUserModel) Create(userModel *UserModel) (userId int64, err error) {
+func (model *defaultUserModel) Create(userModel *UserModel) (err error) {
 	db := model.getDB().Create(userModel)
 	if err = db.Error; err != nil {
 		return
 	}
-	// 获取本次ID
-	userId = db.RowsAffected
 
 	return
 }
