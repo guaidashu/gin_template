@@ -98,8 +98,30 @@ func (model *defaultTemplateModel) Update(templateModel *TemplateModel) error {
 	db := model.getDB()
 	key := fmt.Sprintf("%s%d", templateCacheKey, templateModel.Id)
 
+	// 更新
+	err = db.Where("id = ?", templateModel.Id).Updates(templateModel).Error
+	if err != nil {
+		err = serror.NewErr().SetErr(err)
+		return err
+	}
+
+	// 删除key
+	return model.DelCache(key)
+}
+
+// 最小更新，每次只修改传入不为空或0的字段，如有需要改为空或0的，传入字段定义名
+// 例：
+// type modelName struct {
+//     ExceptColumnsName1 string `json:"..."`
+//     ExceptColumnsName1 int64  `json:"..."`
+// }
+// MinUpdate(templateModel, "ExceptColumnsName1", "ExceptColumnsName2")
+func (model *defaultTemplateModel) MinUpdate(templateModel *TemplateModel, except ...string) error {
+	db := model.getDB()
+	key := fmt.Sprintf("%s%d", templateCacheKey, templateModel.Id)
+
 	// 先转换为更新map
-	update, err := struct2Map(templateModel, nil, nil)
+	update, err := struct2Map(templateModel, NewExcept(except...), nil)
 	if err != nil {
 		err = serror.NewErr().SetErr(err)
 		return err
