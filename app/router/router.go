@@ -21,6 +21,8 @@ func init() {
 
 	// 开启跨域
 	// gin_server.Router.Use(middlewares.Cors())
+	// 创建websocket服务
+	// gin_server.GET("/ws", (&controller.WsController{}).WsHandler)
 	test := gin_server.Group("/test")
 	{
 		test.GET("/", controller.Test)
