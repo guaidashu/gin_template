@@ -70,7 +70,7 @@ func (s *defaultUserSrv) Register(req *requests.RegisterReq) (token *responses.L
 	user.Username = req.Nickname
 	user.AvatarUrl = req.AvatarUrl
 
-	if user.UserId, err = models.NewUserModel().Create(user); err != nil {
+	if err = models.NewUserModel().Create(user); err != nil {
 		err = serror.NewErr().SetErr(err)
 	}
 
