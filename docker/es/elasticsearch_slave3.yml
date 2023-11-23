@@ -1,0 +1,30 @@
+# 集群名称
+cluster.name: es-cluster
+# 节点名称
+node.name: gin_template_elasticsearch3
+# 绑定host，0.0.0.0代表当前节点的ip
+network.host: 0.0.0.0
+# 表示这个节点是否可以充当主节点
+node.master: true
+# 是否充当数据节点
+node.data: true
+# 所有主从节点
+discovery.seed_hosts: [ "gin_template_elasticsearch", "gin_template_elasticsearch2", "gin_template_elasticsearch3" ]
+# 这个参数决定了在选主过程中需要 有多少个节点通信  预防脑裂 N/2+1
+discovery.zen.minimum_master_nodes: 3
+#初始化主节点
+cluster.initial_master_nodes: gin_template_elasticsearch
+# 单节点上可以开启的ES存储实例的个数,没配置的话会报一个错误
+node.max_local_storage_nodes: 3
+bootstrap.memory_lock: false
+
+# 开启x-pack功能，并指定证书位置
+xpack.security.enabled: true
+xpack.security.transport.ssl.enabled: true
+xpack.security.transport.ssl.verification_mode: certificate
+# 下面两个配置在生成elastic-certificates.p12文件时无需配置,会报错的,一样导致容器一直重启
+# 在生成好elastic-certificates.p12文件后并且映射进容器了,再解开注释
+xpack.security.transport.ssl.keystore.path: /usr/share/elasticsearch/config/elastic-certificates.p12
+xpack.security.transport.ssl.truststore.path: /usr/share/elasticsearch/config/elastic-certificates.p12
+xpack.security.transport.ssl.keystore.password: password
+xpack.security.transport.ssl.truststore.password: password

@@ -7,11 +7,6 @@ services:
     image: elasticsearch:7.11.2
     container_name: gin_template_elasticsearch
     environment:
-      - node.name=gin_template_elasticsearch
-      - cluster.name=es-cluster
-      - discovery.seed_hosts=gin_template_elasticsearch,gin_template_elasticsearch2,gin_template_elasticsearch3
-      - cluster.initial_master_nodes=gin_template_elasticsearch,gin_template_elasticsearch2,gin_template_elasticsearch3
-      - bootstrap.memory_lock=false
       - "ES_JAVA_OPTS=-Xms150m -Xmx150m"
     ulimits:
       memlock:
@@ -21,56 +16,55 @@ services:
       - 9200:9200
       - 9300:9300
     volumes:
+      - ${PWD}/elastic-certificates.p12:/usr/share/elasticsearch/config/elastic-certificates.p12 # 挂载整数到容器(证书是先从容器内生成后拷贝出来的)
+      - ${PWD}/elasticsearch_slave1.yml:/usr/share/elasticsearch/config/elasticsearch.yml # 挂载配置文件`
       - ${PWD}/volumes/elasticsearch:/usr/share/elasticsearch/data
+      - ${PWD}/volumes/plugins:/usr/share/elasticsearch/plugins # 分词器插件目录
     networks:
       - gin_template_es_network
   gin_template_elasticsearch2:
     image: elasticsearch:7.11.2
     container_name: gin_template_elasticsearch2
     environment:
-      - node.name=gin_template_elasticsearch2
-      - cluster.name=es-cluster
-      - discovery.seed_hosts=gin_template_elasticsearch,gin_template_elasticsearch2,gin_template_elasticsearch3
-      - cluster.initial_master_nodes=gin_template_elasticsearch,gin_template_elasticsearch2,gin_template_elasticsearch3
-      - bootstrap.memory_lock=false
       - "ES_JAVA_OPTS=-Xms150m -Xmx150m"
     ulimits:
       memlock:
         soft: -1
         hard: -1
     ports:
-      - 9200
-      - 9300
+      - 9201:9201
+      - 9301:9301
     volumes:
+      - ${PWD}/elastic-certificates.p12:/usr/share/elasticsearch/config/elastic-certificates.p12 # 挂载整数到容器(证书是先从容器内生成后拷贝出来的)
+      - ${PWD}/elasticsearch_slave2.yml:/usr/share/elasticsearch/config/elasticsearch.yml # 挂载配置文件`
       - ${PWD}/volumes/elasticsearch2:/usr/share/elasticsearch/data # es集群每个节点的volume 映射位置不能相同
+      - ${PWD}/volumes/plugins:/usr/share/elasticsearch/plugins # 分词器插件目录
     networks:
       - gin_template_es_network
   gin_template_elasticsearch3:
     image: elasticsearch:7.11.2
     container_name: gin_template_elasticsearch3
     environment:
-      - node.name=gin_template_elasticsearch3
-      - cluster.name=es-cluster
-      - discovery.seed_hosts=gin_template_elasticsearch,gin_template_elasticsearch2,gin_template_elasticsearch3
-      - cluster.initial_master_nodes=gin_template_elasticsearch,gin_template_elasticsearch2,gin_template_elasticsearch3
-      - bootstrap.memory_lock=false
       - "ES_JAVA_OPTS=-Xms150m -Xmx150m"
     ulimits:
       memlock:
         soft: -1
         hard: -1
     ports:
-      - 9200
-      - 9300
+      - 9202:9202
+      - 9302:9302
     volumes:
+      - ${PWD}/elastic-certificates.p12:/usr/share/elasticsearch/config/elastic-certificates.p12 # 挂载整数到容器(证书是先从容器内生成后拷贝出来的)
+      - ${PWD}/elasticsearch_slave3.yml:/usr/share/elasticsearch/config/elasticsearch.yml # 挂载配置文件`
       - ${PWD}/volumes/elasticsearch3:/usr/share/elasticsearch/data # es集群每个节点的volume 映射位置不能相同
+      - ${PWD}/volumes/plugins:/usr/share/elasticsearch/plugins # 分词器插件目录
     networks:
       - gin_template_es_network
   gin_template_kibana:
     container_name: gin_template_kibana
     image: kibana:7.11.2
     ports:
-      - 5601:5601
+      - 7040:5601
     depends_on:
       - gin_template_elasticsearch
       - gin_template_elasticsearch2

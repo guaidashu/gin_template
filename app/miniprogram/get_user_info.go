@@ -25,7 +25,7 @@ func GetOpenId(code string) (openInfo *data_struct.MiniProGramLoginInfo, err err
 	requestUrl := "https://api.weixin.qq.com/sns/jscode2session?appid=%v&secret=%v&js_code=%v&grant_type=authorization_code"
 
 	requestUrl = fmt.Sprintf(requestUrl,
-		config.Config.MiniProgram.Appid,
+		config.Config.MiniProgram.AppId,
 		config.Config.MiniProgram.Secret,
 		code)
 
