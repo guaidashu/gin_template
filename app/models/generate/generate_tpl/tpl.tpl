@@ -100,7 +100,7 @@ func (model *defaultTemplateModel) Update(templateModel *TemplateModel) error {
 	key := fmt.Sprintf("%s%d", templateCacheKey, templateModel.Id)
 
 	// 更新
-	err = db.Where("id = ?", templateModel.Id).Save(templateModel).Error
+	err := db.Where("id = ?", templateModel.Id).Save(templateModel).Error
 	if err != nil {
 		err = serror.NewErr().SetErr(err)
 		return err
