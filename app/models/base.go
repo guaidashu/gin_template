@@ -10,6 +10,7 @@ import (
 	"gin_template/app/enum"
 	"gorm.io/gorm"
 	"reflect"
+	"time"
 )
 
 type BaseModel interface {
@@ -31,7 +32,9 @@ type Model struct {
 func getTableWithNoDeleted(gdb *gorm.DB, tableName string) *gorm.DB {
 	db := gdb.Table(tableName)
 	if db != nil {
-		db = db.Where("deleted = 0")
+		loc, _ := time.LoadLocation("Local")
+		theTime, _ := time.ParseInLocation("2006-01-02 15:04:05", "1970-01-01 08:00:01", loc)
+		db = db.Where("deleted_at = ?", theTime)
 	}
 	return db
 }
@@ -158,9 +161,11 @@ type Struct2MapValue struct {
 // 字段tag 加上 s2s:"-" 则会被忽略
 // 成员属性必须带有 json tag标签才能获取
 // 例:
-// type structToMap struct {
-//	   Data int64 `json:"data" struct2map:"-"`
-// }
+//
+//	type structToMap struct {
+//		   Data int64 `json:"data" struct2map:"-"`
+//	}
+//
 // except: 可以赋空值的字段， 通过 NewExcept 获取(参数是定义的成员名，不是tag名，需要注意)
 // 样例：result, err := struct2Map(data, NewExcept("DataString"), nil)
 // 从结构体转为 map (适用于 数据库更新数据)
