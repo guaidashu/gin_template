@@ -79,20 +79,6 @@ func (s *defaultWsSrv) Handler(name string, data []byte, close func()) {
 	s.handler(req)
 }
 
-func getUserId(ctx *Context) (int64, error) {
-	userIdStr, err := ctx.Get("userId")
-	if err != nil {
-		return 0, serror.ErrUserNotFound
-	}
-
-	userId, ok := userIdStr.(int64)
-	if !ok {
-		return 0, serror.ErrUserNotFound
-	}
-
-	return userId, nil
-}
-
 func (s *defaultWsSrv) Register(eventHandler *WsHandler, middlewares ...WsHandlerMiddleware) {
 	s.lock.Lock()
 	defer func() {
