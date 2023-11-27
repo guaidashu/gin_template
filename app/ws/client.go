@@ -36,7 +36,7 @@ type (
 		// 等待组
 		wait *sync.WaitGroup
 		// 此客户端所存在的channel
-		channel string
+		channel []string
 		// 此客户端名(由雪花算法计算而来)
 		name string
 	}
@@ -112,7 +112,7 @@ func (c *Client) close() {
 
 func (c *Client) Send(event enum.WsEventEnum, data interface{}) {
 	resp := &data_struct.WsResponse{
-		Event: string(event),
+		Event: event,
 		Data:  data,
 	}
 

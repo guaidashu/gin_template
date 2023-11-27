@@ -12,6 +12,7 @@ import (
 	"gin_template/app/libs"
 	jwt2 "gin_template/app/libs/jwt"
 	"gin_template/app/libs/serror"
+	"gin_template/app/ws"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
@@ -97,4 +98,54 @@ func validateToken(validateType int64) gin.HandlerFunc {
 
 		ctx.Next()
 	}
+}
+
+func ValidateWsToken(ctx *ws.Context) error {
+	var (
+		auth = jwt2.NewJwtToken()
+	)
+
+	tokenInterface, err := ctx.Get("token")
+	if err != nil {
+		return err
+	}
+
+	token := tokenInterface.(string)
+	if token == "" {
+		err := serror.ErrNoAuth
+		libs.Logger.Error(err.String())
+		return err
+	}
+
+	userId, err := auth.GetUidByToken(token)
+	if err != nil {
+		if e, ok := err.(*jwt.ValidationError); ok {
+			switch e.Errors {
+			case jwt.ValidationErrorExpired:
+				err = serror.NewErr().SetMsg("授权已过期")
+				libs.Logger.Error(err)
+				return err
+			case jwt.ValidationErrorClaimsInvalid,
+				jwt.ValidationErrorSignatureInvalid,
+				jwt.ValidationErrorNotValidYet,
+				jwt.ValidationErrorId,
+				jwt.ValidationErrorIssuedAt,
+				jwt.ValidationErrorIssuer:
+				err = serror.NewErr().SetMsg("无效授权")
+				libs.Logger.Error(err)
+				return err
+			}
+		}
+	}
+
+	if userId == 0 {
+		err := serror.NewErr().SetMsg("无效授权")
+		libs.Logger.Error(err)
+		return err
+	}
+
+	// 设置用户ID
+	ctx.Set("userId", userId)
+
+	return nil
 }

@@ -4,10 +4,11 @@ type WsEventEnum string
 
 // websocket相关事件
 const (
-	WsCreateConnect       WsEventEnum = "ws_create_connect"         // 建立连接
-	WsSubscribeEvent      WsEventEnum = "ws_subscribe_event"        // 订阅
-	WsCloseEvent          WsEventEnum = "ws_close_event"            // 关闭消息
-	WsPongEvent           WsEventEnum = "ws_pong_event"             // 心跳
+	WsCreateConnect  WsEventEnum = "ws_create_connect"  // 建立连接
+	WsSubscribeEvent WsEventEnum = "ws_subscribe_event" // 订阅
+	WsCloseEvent     WsEventEnum = "ws_close_event"     // 关闭消息
+	WsPongEvent      WsEventEnum = "ws_pong_event"      // 心跳
+	WsExampleEvent   WsEventEnum = "ws_example_event"   // 例子事件，可删除
 )
 
 type WsChannelEnum string
@@ -16,4 +17,3 @@ type WsChannelEnum string
 const (
 	WsExampleChannel WsChannelEnum = "ws_example_channel"
 )
-

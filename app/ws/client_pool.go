@@ -1,8 +1,8 @@
 package ws
 
 import (
-	"gin_template/app/enum"
 	"fmt"
+	"gin_template/app/enum"
 	"sync"
 )
 
@@ -14,8 +14,12 @@ var (
 type (
 	// 客户端连接池
 	ClientPool struct {
+		// 客户端连接池的读写锁
+		clientsLock sync.RWMutex
 		// 客户端连接池
 		clients map[string]*Client
+		// channel客户端连接池读写锁
+		clientsChannelLock sync.RWMutex
 		// channel客户端连接池 (精确到每一个channel组)， 暂时不启用
 		clientsChannel map[string]map[string]*Client
 		// 发送的数据
@@ -48,7 +52,9 @@ func (c *ClientPool) registerClient() {
 	for {
 		select {
 		case register := <-c.register:
+			c.clientsLock.Lock()
 			c.clients[register.name] = register
+			c.clientsLock.Unlock()
 		}
 	}
 }
@@ -57,20 +63,37 @@ func (c *ClientPool) unregisterClient() {
 	for {
 		select {
 		case unregister := <-c.unregister:
+			c.clientsLock.Lock()
 			delete(c.clients, unregister.name)
+			c.clientsLock.Unlock()
 		}
 	}
 }
 
 func (c *ClientPool) Get(name string) *Client {
+	c.clientsLock.RLock()
+	defer func() {
+		c.clientsLock.RUnlock()
+	}()
+
 	return c.clients[name]
 }
 
 func (c *ClientPool) GetChannel(channel enum.WsChannelEnum) map[string]*Client {
+	c.clientsChannelLock.RLock()
+	defer func() {
+		c.clientsChannelLock.RUnlock()
+	}()
+
 	return c.clientsChannel[string(channel)]
 }
 
 func (c *ClientPool) GetByChannel(name string, channel enum.WsChannelEnum) *Client {
+	c.clientsChannelLock.RLock()
+	defer func() {
+		c.clientsChannelLock.RUnlock()
+	}()
+
 	if _, ok := c.clientsChannel[string(channel)]; !ok {
 		return nil
 	}
@@ -80,30 +103,58 @@ func (c *ClientPool) GetByChannel(name string, channel enum.WsChannelEnum) *Clie
 
 // 设置client到channel的map连接池子
 func (c *ClientPool) SetChannel(name, channel string) {
+	c.clientsChannelLock.Lock()
+	defer func() {
+		c.clientsChannelLock.Unlock()
+	}()
+
 	if _, ok := c.clientsChannel[channel]; !ok {
 		c.clientsChannel[channel] = make(map[string]*Client)
 	}
 
-	c.clients[name].channel = channel
+	c.clientsLock.RLock()
+	defer func() {
+		c.clientsLock.RUnlock()
+	}()
+
+	c.clients[name].channel = append(c.clients[name].channel, channel)
 	c.clientsChannel[channel][name] = c.clients[name]
 }
 
 // 结束项目时执行
 func (c *ClientPool) CloseAllClients() {
+	c.clientsLock.Lock()
+	defer func() {
+		c.clientsLock.Unlock()
+	}()
+
 	for _, v := range c.clients {
 		v.close()
 	}
 }
 
-func (c *ClientPool) RemoveClient(name string, channel string) {
+func (c *ClientPool) RemoveClient(name string, channels []string) {
+	c.clientsLock.RLock()
+	defer func() {
+		c.clientsLock.RUnlock()
+	}()
+
+	c.clientsChannelLock.Lock()
+	defer func() {
+		c.clientsChannelLock.Unlock()
+	}()
+
 	// 移除clients的client
 	c.unregister <- c.clients[name]
 
 	// 移除channel池的client
-	if _, ok := c.clientsChannel[channel]; !ok {
-		return
+	for _, channel := range channels {
+		if _, ok := c.clientsChannel[channel]; !ok {
+			continue
+		}
+
+		delete(c.clientsChannel[channel], name)
 	}
-	delete(c.clientsChannel[channel], name)
 }
 
 // 广播

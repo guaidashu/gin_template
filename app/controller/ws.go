@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"gin_template/app/service"
 	"gin_template/app/ws"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -29,5 +28,5 @@ func (c *WsController) WsHandler(ctx *gin.Context) {
 		return
 	}
 
-	ws.ServeWs(conn, service.NewWsSrv().Handler)
+	ws.ServeWs(conn, ws.NewWsSrv().Handler)
 }
