@@ -27,10 +27,8 @@ func init() {
 	// wsSrv := ws.NewWsSrv()
 	//
 	// wsExampleController := &controller.WsExampleController{}
-	// wsSrv.Register(&ws.WsHandler{
-	// 	EventName: enum.WsExampleEvent,
-	// 	Handler:   wsExampleController.TestWsRouter,
-	// }).Use(middlewares.ValidateWsToken)
+	// wsSrv.Register(enum.WsExampleEvent, wsExampleController.TestWsRouter). // 参数分别为：路由名 处理方法
+	// 									Use(middlewares.ValidateWsToken)
 
 	test := gin_server.Group("/test")
 	{

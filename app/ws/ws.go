@@ -14,7 +14,7 @@ type (
 		// 总处理handler
 		Handler(name string, data []byte, close func())
 		// 注册路由
-		Register(eventHandler *WsHandler) *WsEventHandler
+		Register(eventName enum.WsEventEnum, handlerFunc WsHandlerFunc) *WsEventHandler
 	}
 
 	defaultWsSrv struct {
@@ -79,11 +79,16 @@ func (s *defaultWsSrv) Handler(name string, data []byte, close func()) {
 	s.handler(req)
 }
 
-func (s *defaultWsSrv) Register(eventHandler *WsHandler) *WsEventHandler {
+func (s *defaultWsSrv) Register(eventName enum.WsEventEnum, handlerFunc WsHandlerFunc) *WsEventHandler {
 	s.lock.Lock()
 	defer func() {
 		s.lock.Unlock()
 	}()
+
+	eventHandler := &WsHandler{
+		EventName: eventName,
+		Handler:   handlerFunc,
+	}
 
 	libs.DebugPrint("ws监听：--> %v 事件监听开始", eventHandler.EventName)
 	handler := &WsEventHandler{
