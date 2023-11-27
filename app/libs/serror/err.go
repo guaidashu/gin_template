@@ -10,7 +10,7 @@ package serror
 import (
 	"errors"
 	"fmt"
-	"gin_template/app/config"
+	"os"
 	"runtime"
 	"strings"
 )
@@ -19,7 +19,7 @@ type (
 	Error interface {
 		error
 		// 绑定err
-		SetErr(value interface{}) Error
+		SetErr(value interface{}, skip ...int) Error
 		// 设置返回code
 		SetCode(code int64) Error
 		// 获取设置的code
@@ -57,18 +57,23 @@ func NewErr(isLog ...bool) Error {
 
 func NewError(code int64, msg string) Error {
 	return &defaultErr{
-		code: code,
-		msg:  msg,
-		err:  errors.New(msg),
+		code:   code,
+		msg:    msg,
+		errMsg: []string{msg},
 	}
 }
 
-func (e *defaultErr) SetErr(value interface{}) Error {
+func (e *defaultErr) SetErr(value interface{}, skips ...int) Error {
+	skip := 2
+	if len(skips) > 0 {
+		skip = skips[0]
+	}
+
 	// 这里要考虑到多层的问题
 	tmpErr, ok := value.(Error)
 	if !ok {
 		e.msg = fmt.Sprintf("%v", value)
-		e.errMsg = append(e.errMsg, fmt.Sprintf("%s: %v", getCaller(value), value))
+		e.errMsg = append(e.errMsg, fmt.Sprintf("%s: %v", getCaller(skip), value))
 		return e
 	}
 
@@ -79,7 +84,7 @@ func (e *defaultErr) SetErr(value interface{}) Error {
 		e.errMsg = append(e.errMsg, v)
 	}
 
-	e.errMsg = append(e.errMsg, fmt.Sprintf("%s", getCaller(value)))
+	e.errMsg = append(e.errMsg, fmt.Sprintf("%s", getCaller(skip)))
 
 	return e
 }
@@ -94,8 +99,7 @@ func (e *defaultErr) SetCode(code int64) Error {
 }
 
 func (e *defaultErr) SetMsg(msg string) Error {
-	e.msg = msg
-	return e
+	return e.SetErr(errors.New(msg), 3)
 }
 
 func (e *defaultErr) Msg() string {
@@ -118,11 +122,13 @@ func (e *defaultErr) ErrMsg() []string {
 	return e.errMsg
 }
 
-func getCaller(value interface{}) string {
-	if !config.Config.App.DEBUG {
+func getCaller(skip int) string {
+	debug := os.Getenv("DEBUG")
+	if debug != "true" {
 		return ""
 	}
+
 	// 这里用于打印报错文件及行数
-	_, fileName, line, _ := runtime.Caller(2)
+	_, fileName, line, _ := runtime.Caller(skip)
 	return fmt.Sprintf("report in: %v: in line %v", fileName, line)
 }
