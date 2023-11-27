@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"gorm.io/gorm"
+	"time"
 )
 
 var (
@@ -137,7 +138,7 @@ func (model *defaultTemplateModel) GetTemplateIdById(Id int64) (templateModel *T
 		return
 	}
 
-	if templateModel.Deleted != 0 {
+	if templateModel.DeletedAt.Unix() > 1 {
 		err = gorm.ErrRecordNotFound
 		return
 	}

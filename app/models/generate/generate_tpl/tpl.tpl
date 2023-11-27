@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"gorm.io/gorm"
+	"time"
 )
 
 var (
@@ -21,11 +22,11 @@ type (
 		// 主键
 		Id int64 `gorm:"primary_key;column:id;auto_increment;comment:'主键'" json:"id"`
 		// 创建时间
-        Created int64 `gorm:"column:created;comment:'创建时间'" json:"created"`
-        // 更新时间
-        Updated int64 `gorm:"column:updated;comment:'更新时间'" json:"updated"`
-        // 删除时间
-        Deleted int64 `gorm:"column:deleted;default:0;comment:'删除时间'" json:"deleted"`
+		CreatedAt time.Time `gorm:"column:created_at" json:"created_at"`
+		// 更新时间
+		UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at"`
+		// 删除时间
+		DeletedAt time.Time `gorm:"column:deleted_at" json:"deleted_at"`
 	}
 )
 
@@ -146,7 +147,7 @@ func (model *defaultTemplateModel) GetTemplateIdById(Id int64) (templateModel *T
 		return
 	}
 
-	if templateModel.Deleted != 0 {
+	if templateModel.DeletedAt.Unix() > 1 {
 		err = gorm.ErrRecordNotFound
 		return
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gin_template/app/libs/serror"
 	"sync"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -43,11 +44,11 @@ type (
 		// 邮箱
 		Email string `gorm:"column:email;comment:'邮箱'" json:"email"`
 		// 创建时间
-		Created int64 `gorm:"column:created;comment:'创建时间'" json:"created"`
+		CreatedAt time.Time `gorm:"column:created_at" json:"created_at"`
 		// 更新时间
-		Updated int64 `gorm:"column:updated;comment:'更新时间'" json:"updated"`
+		UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at"`
 		// 删除时间
-		Deleted int64 `gorm:"column:deleted;default:0;comment:'删除时间'" json:"deleted"`
+		DeletedAt time.Time `gorm:"column:deleted_at" json:"deleted_at"`
 	}
 )
 
@@ -145,7 +146,7 @@ func (model *defaultUserModel) GetUserById(userId int64) (userModel *UserModel, 
 		return
 	}
 
-	if userModel.Deleted != 0 {
+	if userModel.DeletedAt.Unix() > 1 {
 		err = gorm.ErrRecordNotFound
 		return
 	}
