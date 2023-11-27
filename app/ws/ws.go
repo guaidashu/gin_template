@@ -14,7 +14,7 @@ type (
 		// 总处理handler
 		Handler(name string, data []byte, close func())
 		// 注册路由
-		Register(eventHandler *WsHandler, middlewares ...WsHandlerMiddleware)
+		Register(eventHandler *WsHandler) *WsEventHandler
 	}
 
 	defaultWsSrv struct {
@@ -79,17 +79,20 @@ func (s *defaultWsSrv) Handler(name string, data []byte, close func()) {
 	s.handler(req)
 }
 
-func (s *defaultWsSrv) Register(eventHandler *WsHandler, middlewares ...WsHandlerMiddleware) {
+func (s *defaultWsSrv) Register(eventHandler *WsHandler) *WsEventHandler {
 	s.lock.Lock()
 	defer func() {
 		s.lock.Unlock()
 	}()
 
 	libs.DebugPrint("ws监听：--> %v 事件监听开始", eventHandler.EventName)
-	s.handlers[eventHandler.EventName] = &WsEventHandler{
+	handler := &WsEventHandler{
 		Handler:     eventHandler,
-		Middlewares: middlewares,
+		Middlewares: make([]WsHandlerMiddleware, 0),
 	}
+	s.handlers[eventHandler.EventName] = handler
+
+	return handler
 }
 
 func (s *defaultWsSrv) handler(req *data_struct.WsRequest) {

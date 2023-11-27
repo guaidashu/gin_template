@@ -30,7 +30,7 @@ func init() {
 	// wsSrv.Register(&ws.WsHandler{
 	// 	EventName: enum.WsExampleEvent,
 	// 	Handler:   wsExampleController.TestWsRouter,
-	// })
+	// }).Use(middlewares.ValidateWsToken)
 
 	test := gin_server.Group("/test")
 	{
