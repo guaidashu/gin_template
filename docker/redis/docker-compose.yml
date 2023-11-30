@@ -1,21 +1,38 @@
 version: '3'
+networks:
+  gin_template_redis_network:
 
 services:
   master:
-    image: redis
+    image: redis:7.2.3
     container_name: rds-master
-    command: rds-server --requirepass redis_pwd  --masterauth redis_pwd
     ports:
-      - 6380:6379
+      - 6379:6379
+    volumes:
+      - ${PWD}/redis.conf:/etc/redis/redis.conf
+      - ${PWD}/volumes/redis/data:/data
+    command: redis-server --requirepass redis_pwd  --masterauth redis_pwd
+    networks:
+      - gin_template_redis_network
   slave1:
-    image: redis
+    image: redis:7.2.3
     container_name: rds-slave-1
     ports:
-      - 6381:6379
-    command:  rds-server --slaveof rds-master 6379 --requirepass redis_pwd --masterauth redis_pwd
+      - 6380:6379
+    volumes:
+      - ${PWD}/redis.conf:/etc/redis/redis.conf
+      - ${PWD}/volumes/redis2/data:/data
+    command: redis-server --slaveof rds-master 6379 --requirepass redis_pwd --masterauth redis_pwd
+    networks:
+      - gin_template_redis_network
   slave2:
-    image: redis
+    image: redis:7.2.3
     container_name: rds-slave-2
     ports:
-      - 6382:6379
-    command: rds-server --slaveof rds-master 6379 --requirepass redis_pwd --masterauth redis_pwd
+      - 6381:6379
+    volumes:
+      - ${PWD}/redis.conf:/etc/redis/redis.conf
+      - ${PWD}/volumes/redis3/data:/data
+    command: redis-server --slaveof rds-master 6379 --requirepass redis_pwd --masterauth redis_pwd
+    networks:
+      - gin_template_redis_network
