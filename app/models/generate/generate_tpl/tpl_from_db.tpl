@@ -87,10 +87,15 @@ func (model *defaultTemplateModel) FindOne(Id int64) (*TemplateModel, error) {
 
 // 单条更新, 多条更新请自行定义并维护键值
 func (model *defaultTemplateModel) Update(templateModel *TemplateModel) error {
-	db := model.getDB()
-	key := fmt.Sprintf("%s%d", templateCacheKey, templateModel.Id)
+    key := fmt.Sprintf("%s%d", templateCacheKey, templateModel.Id)
+    // 先删除一次缓存，防止redis操作失败导致数据不一致
+	err := model.DelCache(key)
+	if err != nil {
+		return serror.NewErr().SetErr(err)
+	}
 
 	// 更新
+	db := model.getDB()
 	err := db.Where("id = ?", templateModel.Id).Save(templateModel).Error
 	if err != nil {
 		err = serror.NewErr().SetErr(err)
@@ -109,8 +114,12 @@ func (model *defaultTemplateModel) Update(templateModel *TemplateModel) error {
 // }
 // MinUpdate(templateModel, "ExceptColumnsName1", "ExceptColumnsName2")
 func (model *defaultTemplateModel) MinUpdate(templateModel *TemplateModel, except ...string) error {
-	db := model.getDB()
-	key := fmt.Sprintf("%s%d", templateCacheKey, templateModel.Id)
+    key := fmt.Sprintf("%s%d", templateCacheKey, templateModel.Id)
+    // 先删除一次缓存，防止redis操作失败导致数据不一致
+	err := model.DelCache(key)
+	if err != nil {
+		return serror.NewErr().SetErr(err)
+	}
 
 	// 先转换为更新map
 	update, err := struct2Map(templateModel, NewExcept(except...), nil)
@@ -121,6 +130,7 @@ func (model *defaultTemplateModel) MinUpdate(templateModel *TemplateModel, excep
 
 	// 更新
 	delete(update, "id")
+	db := model.getDB()
 	err = db.Where("id = ?", templateModel.Id).Updates(update).Error
 	if err != nil {
 		err = serror.NewErr().SetErr(err)

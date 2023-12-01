@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"gin_template/app/libs/serror"
 	"sync"
-	"time"
 
 	"gorm.io/gorm"
+	"time"
 )
 
 var (
-	userCacheKey = "user#cache#"
+	userCacheKey = "gin_template#user#cache#"
 )
 
 type (
@@ -20,7 +20,7 @@ type (
 
 	UserModel struct {
 		// 主键
-		UserId int64 `gorm:"primary_key;column:user_id;auto_increment" json:"user_id"`
+		Id int64 `gorm:"primary_key;column:id;auto_increment;comment:'主键'" json:"id"`
 		// 用户名
 		Username string `gorm:"not null;size:255;column:username" json:"username"`
 		// 手机号
@@ -89,6 +89,7 @@ func (model *defaultUserModel) CreateTable() error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -103,11 +104,11 @@ func (model *defaultUserModel) Create(userModel *UserModel) (err error) {
 }
 
 // 通过主键获取 数据
-func (model *defaultUserModel) FindOne(userId int64) (*UserModel, error) {
-	db := model.getDB().Where("user_id = ?", userId)
+func (model *defaultUserModel) FindOne(Id int64) (*UserModel, error) {
+	db := model.getDB().Where("id = ?", Id)
 
 	userModel := new(UserModel)
-	key := fmt.Sprintf("%s%d", userCacheKey, userId)
+	key := fmt.Sprintf("%s%d", userCacheKey, Id)
 	err := model.QueryRow(userModel, key, db, func(conn *gorm.DB, v interface{}) error {
 		return conn.First(v).Error
 	})
@@ -117,19 +118,53 @@ func (model *defaultUserModel) FindOne(userId int64) (*UserModel, error) {
 
 // 单条更新, 多条更新请自行定义并维护键值
 func (model *defaultUserModel) Update(userModel *UserModel) error {
+	key := fmt.Sprintf("%s%d", userCacheKey, userModel.Id)
+	// 先删除一次缓存，防止redis操作失败导致数据不一致
+	err := model.DelCache(key)
+	if err != nil {
+		return serror.NewErr().SetErr(err)
+	}
+
+	// 更新
 	db := model.getDB()
-	key := fmt.Sprintf("%s%d", userCacheKey, userModel.UserId)
+	err = db.Where("id = ?", userModel.Id).Save(userModel).Error
+	if err != nil {
+		err = serror.NewErr().SetErr(err)
+		return err
+	}
+
+	// 删除key
+	return model.DelCache(key)
+}
+
+// 最小更新，每次只修改传入不为空或0的字段，如有需要改为空或0的，传入字段定义名
+// 例：
+//
+//	type modelName struct {
+//	    ExceptColumnsName1 string `json:"..."`
+//	    ExceptColumnsName1 int64  `json:"..."`
+//	}
+//
+// MinUpdate(userModel, "ExceptColumnsName1", "ExceptColumnsName2")
+func (model *defaultUserModel) MinUpdate(userModel *UserModel, except ...string) error {
+	key := fmt.Sprintf("%s%d", userCacheKey, userModel.Id)
+	// 先删除一次缓存，防止redis操作失败导致数据不一致
+	err := model.DelCache(key)
+	if err != nil {
+		return serror.NewErr().SetErr(err)
+	}
 
 	// 先转换为更新map
-	update, err := struct2Map(userModel, nil, nil)
+	update, err := struct2Map(userModel, NewExcept(except...), nil)
 	if err != nil {
 		err = serror.NewErr().SetErr(err)
 		return err
 	}
 
 	// 更新
-	delete(update, "user_id")
-	err = db.Where("user_id = ?", userModel.UserId).Updates(update).Error
+	delete(update, "id")
+	db := model.getDB()
+	err = db.Where("id = ?", userModel.Id).Updates(update).Error
 	if err != nil {
 		err = serror.NewErr().SetErr(err)
 		return err
@@ -140,8 +175,8 @@ func (model *defaultUserModel) Update(userModel *UserModel) error {
 }
 
 // 通过主键ID获取单条数据 (已经被软删除的数据)
-func (model *defaultUserModel) GetUserById(userId int64) (userModel *UserModel, err error) {
-	userModel, err = model.FindOne(userId)
+func (model *defaultUserModel) GetUserById(Id int64) (userModel *UserModel, err error) {
+	userModel, err = model.FindOne(Id)
 	if err != nil {
 		return
 	}
