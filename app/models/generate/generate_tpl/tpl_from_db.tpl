@@ -64,6 +64,7 @@ func (model *defaultTemplateModel) CreateTable() error {
 
 // 创建数据并返回本次插入的ID
 func (model *defaultTemplateModel) Create(templateModel *TemplateModel) (err error) {
+    templateModel.DeletedAt = time.Unix(1, 0)
 	db := model.getDB().Create(templateModel)
 	if err = db.Error; err != nil {
 		return
