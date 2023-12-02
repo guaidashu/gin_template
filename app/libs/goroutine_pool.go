@@ -47,7 +47,7 @@ func (g *GoroutinePool) execute(task *Task) {
 	// 防止panic导致整个worker崩溃
 	defer func() {
 		if rcv := recover(); rcv != nil {
-			log.Println("%v", rcv)
+			log.Printf("%v\n", rcv)
 		}
 	}()
 
