@@ -15,8 +15,8 @@ import (
 
 type (
 	abstract struct {
-		keyMap   map[string]int64 // 所有的key存在此map里, 初始化的时候从redis获取
-		cacheKey string           // 服务对应的键值对数据 key
+		keyMap   map[string]string // 所有的key存在此map里, 初始化的时候从redis获取
+		cacheKey string            // 服务对应的键值对数据 key
 	}
 )
 
@@ -28,12 +28,13 @@ func (c *abstract) client() *redis.Client {
 // 设置键值后同步到redis
 func (c *abstract) setKeys(keys ...string) {
 	for _, v := range keys {
-		if c.keyMap[v] == 0 {
-			c.keyMap[v] = 1
+		if _, ok := c.keyMap[v]; ok {
+			continue
 		}
-	}
 
-	_ = NewKeyMapCache().SetKeyMaps(c.cacheKey, c.keyMap)
+		c.keyMap[v] = "1"
+		_ = NewKeyMapCache().SetKeyMaps(v)
+	}
 }
 
 // 删除键值后同步到redis
@@ -42,5 +43,5 @@ func (c *abstract) delKeys(keys ...string) {
 		delete(c.keyMap, v)
 	}
 
-	_ = NewKeyMapCache().SetKeyMaps(c.cacheKey, c.keyMap)
+	_ = NewKeyMapCache().DelKeyMaps(keys...)
 }

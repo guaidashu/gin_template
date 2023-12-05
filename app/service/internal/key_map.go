@@ -8,7 +8,6 @@
 package internal
 
 import (
-	"encoding/json"
 	"sync"
 )
 
@@ -22,9 +21,11 @@ import (
 type (
 	KeyMapCache interface {
 		// 通过key 获取原有的值
-		GetKeyMaps(key string) (data map[string]int64)
+		GetKeyMaps(key string) (data map[string]string)
 		// 设置key map
-		SetKeyMaps(key string, data map[string]int64) error
+		SetKeyMaps(key string) error
+		// 删除key map
+		DelKeyMaps(key ...string) error
 	}
 
 	defaultKeyMapCache struct {
@@ -45,26 +46,21 @@ func NewKeyMapCache() KeyMapCache {
 	return _keyMapCache
 }
 
-func (c *defaultKeyMapCache) GetKeyMaps(key string) (data map[string]int64) {
-	data = make(map[string]int64)
-	val, err := c.client().Get(key).Result()
-	if err != nil || val == "" {
+func (c *defaultKeyMapCache) GetKeyMaps(key string) (data map[string]string) {
+	data = make(map[string]string)
+	val, err := c.client().HGetAll(key).Result()
+	if err != nil || val == nil {
 		return
 	}
 
-	err = json.Unmarshal([]byte(val), &data)
-	if err != nil {
-		return
-	}
-
+	data = val
 	return
 }
 
-func (c *defaultKeyMapCache) SetKeyMaps(key string, data map[string]int64) error {
-	val, err := json.Marshal(data)
-	if err != nil {
-		return err
-	}
+func (c *defaultKeyMapCache) SetKeyMaps(key string) error {
+	return c.client().HSet(c.cacheKey, key, "1").Err()
+}
 
-	return c.client().Set(key, string(val), 0).Err()
+func (c *defaultKeyMapCache) DelKeyMaps(key ...string) error {
+	return c.client().HDel(c.cacheKey, key...).Err()
 }
