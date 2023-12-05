@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UserRouter(engine *gin.Engine) {
+func UserRouter(engine *gin.RouterGroup) {
 	// 普通端用户接口
 	userRouter := engine.Group("/user").Use(middlewares.ValidateUser())
 	userRouterFunc(userRouter)

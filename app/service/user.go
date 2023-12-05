@@ -74,12 +74,12 @@ func (s *defaultUserSrv) Register(req *requests.RegisterReq) (token *responses.L
 		err = serror.NewErr().SetErr(err)
 	}
 
-	tokenStr, claims, generateErr := jwt.NewJwtToken().GenerateToken(user.UserId)
+	tokenStr, claims, generateErr := jwt.NewJwtToken().GenerateToken(user.Id)
 	if generateErr != nil {
 		err = serror.NewErr().SetErr(generateErr)
 		return
 	}
-	refreshToken, _, generateErr := jwt.NewJwtRefreshToken().GenerateToken(user.UserId)
+	refreshToken, _, generateErr := jwt.NewJwtRefreshToken().GenerateToken(user.Id)
 	if generateErr != nil {
 		err = serror.NewErr().SetErr(generateErr)
 		return
