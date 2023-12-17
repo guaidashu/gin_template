@@ -36,6 +36,11 @@ func getTableWithNoDeleted(gdb *gorm.DB, tableName string) *gorm.DB {
 		theTime, _ := time.ParseInLocation("2006-01-02 15:04:05", "1970-01-01 08:00:01", loc)
 		db = db.Where("deleted_at = ?", theTime)
 	}
+	// 数据库存整数时间戳时打开注释(适用于要根据时间排序的业务)
+	// if db != nil {
+	// 	db = db.Where("deleted_at = ?", 0)
+	// }
+
 	return db
 }
 
