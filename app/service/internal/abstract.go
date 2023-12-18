@@ -7,23 +7,12 @@
 
 package internal
 
-import (
-	"gin_template/app/rds"
-
-	"github.com/go-redis/redis"
-)
-
 type (
 	abstract struct {
-		keyMap   map[string]string // 所有的key存在此map里, 初始化的时候从redis获取
-		cacheKey string            // 服务对应的键值对数据 key
+		keyMap      map[string]string // 所有的key存在此map里, 初始化的时候从redis获取
+		keyMapCache KeyMapCache
 	}
 )
-
-// client 获取客户端
-func (c *abstract) client() *redis.Client {
-	return rds.Redis
-}
 
 // 设置键值后同步到redis
 func (c *abstract) setKeys(keys ...string) {
@@ -33,7 +22,13 @@ func (c *abstract) setKeys(keys ...string) {
 		}
 
 		c.keyMap[v] = "1"
-		_ = NewKeyMapCache().SetKeyMaps(v)
+		// 内存不存在，则去redis尝试获取
+		exists, _ := c.keyMapCache.Exists(v)
+		if exists {
+			continue
+		}
+
+		_ = c.keyMapCache.SetKeyMaps(v)
 	}
 }
 
@@ -43,5 +38,5 @@ func (c *abstract) delKeys(keys ...string) {
 		delete(c.keyMap, v)
 	}
 
-	_ = NewKeyMapCache().DelKeyMaps(keys...)
+	_ = c.keyMapCache.DelKeyMaps(keys...)
 }

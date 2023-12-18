@@ -7,7 +7,11 @@
 
 package internal
 
-import "sync"
+import (
+	"gin_template/app/rds"
+	"github.com/go-redis/redis"
+	"sync"
+)
 
 type (
 	UserCache interface {
@@ -26,12 +30,21 @@ var (
 func NewUserCache() UserCache {
 	_userCacheOnce.Do(func() {
 		_userCache = &defaultUserCache{
-			abstract: abstract{
-				keyMap:   NewKeyMapCache().GetKeyMaps("userKeyMapCache"),
-				cacheKey: "userKeyMapCache",
-			},
+			abstract: abstract{},
 		}
+
+		_userCache.(*defaultUserCache).init()
 	})
 
 	return _userCache
+}
+
+func (c *defaultUserCache) init() {
+	// 初始化 key map
+	c.abstract.keyMapCache = NewKeyMapCache("defaultUserCache", c.client())
+	c.abstract.keyMap = c.abstract.keyMapCache.GetKeyMaps()
+}
+
+func (c *defaultUserCache) client() *redis.Client {
+	return rds.Redis
 }

@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"gin_template/app/libs/datetime"
+	"gin_template/app/rds"
 	"strconv"
 	"time"
 
@@ -46,6 +47,10 @@ func NewSmsCache() SmsCache {
 		ipLimitKey:     "gogo:sms:ipLimit:%s",
 		mobileLimitKey: "gogo:sms:mobileLimit:%s",
 	}
+}
+
+func (c *defaultSmsCache) client() *redis.Client {
+	return rds.Redis
 }
 
 // SetCode 设置短信验证码缓存

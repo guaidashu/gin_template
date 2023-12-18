@@ -7,15 +7,18 @@
 
 package internal
 
-import "sync"
+import (
+	"gin_template/app/rds"
+	"github.com/go-redis/redis"
+	"sync"
+)
 
 type (
 	ShoppingCartCache interface {
 	}
 
 	defaultShoppingCartCache struct {
-		*abstract
-		keyMap map[string]int64 // 所有的key存在此map里, 初始化的时候从redis获取
+		abstract *abstract
 	}
 )
 
@@ -27,16 +30,27 @@ var (
 func NewShoppingCartCache() ShoppingCartCache {
 	_shoppingCartCacheOnce.Do(func() {
 		_shoppingCartCache = &defaultShoppingCartCache{
-			abstract: &abstract{
-				keyMap:   NewKeyMapCache().GetKeyMaps("shoppingCartKeyMapCache"),
-				cacheKey: "shoppingCartKeyMapCache",
-			},
+			abstract: &abstract{},
 		}
+
+		_shoppingCartCache.(*defaultShoppingCartCache).init()
 	})
 
 	return _shoppingCartCache
 }
 
+func (c *defaultShoppingCartCache) init() {
+	// 初始化 key map
+	c.abstract.keyMapCache = NewKeyMapCache("defaultShoppingCartCache", c.client())
+	c.abstract.keyMap = c.abstract.keyMapCache.GetKeyMaps()
+}
+
+func (c *defaultShoppingCartCache) client() *redis.Client {
+	return rds.Redis
+}
+
+// keyMap:   NewKeyMapCache().GetKeyMaps("shoppingCartKeyMapCache"),
+// cacheKey: "shoppingCartKeyMapCache",
 func (c *defaultShoppingCartCache) AddMerchandise() {
-	c.setKeys()
+	c.abstract.setKeys()
 }

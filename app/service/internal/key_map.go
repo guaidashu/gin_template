@@ -8,6 +8,7 @@
 package internal
 
 import (
+	"github.com/go-redis/redis"
 	"sync"
 )
 
@@ -17,19 +18,21 @@ import (
 // 而且会造成其他一系列的复杂操作, 所以考虑自行维护 一些必要的键值
 // 比如定时任务等 后续需要删除的键值, 就可以通过此模块进行维护
 // PS: 有定时任务等相关要删除键值操作的才建议用此模块进行操作,否则会多出一些多余的redis读写
-// 暂时只是单机版本, 如果后续业务有拓展微服务需求,则要通过redis全局锁进行加锁实现事务操作
 type (
 	KeyMapCache interface {
 		// 通过key 获取原有的值
-		GetKeyMaps(key string) (data map[string]string)
+		GetKeyMaps() (data map[string]string)
 		// 设置key map
 		SetKeyMaps(key string) error
 		// 删除key map
 		DelKeyMaps(key ...string) error
+		// key是否存在
+		Exists(key string) (bool, error)
 	}
 
 	defaultKeyMapCache struct {
-		abstract
+		cacheKey string // 服务对应的键值对数据 key
+		client   *redis.Client
 	}
 )
 
@@ -38,17 +41,20 @@ var (
 	_keyMapCacheOnce sync.Once
 )
 
-func NewKeyMapCache() KeyMapCache {
+func NewKeyMapCache(cacheKey string, client *redis.Client) KeyMapCache {
 	_keyMapCacheOnce.Do(func() {
-		_keyMapCache = &defaultKeyMapCache{}
+		_keyMapCache = &defaultKeyMapCache{
+			client:   client,
+			cacheKey: cacheKey,
+		}
 	})
 
 	return _keyMapCache
 }
 
-func (c *defaultKeyMapCache) GetKeyMaps(key string) (data map[string]string) {
+func (c *defaultKeyMapCache) GetKeyMaps() (data map[string]string) {
 	data = make(map[string]string)
-	val, err := c.client().HGetAll(key).Result()
+	val, err := c.client.HGetAll(c.cacheKey).Result()
 	if err != nil || val == nil {
 		return
 	}
@@ -58,9 +64,13 @@ func (c *defaultKeyMapCache) GetKeyMaps(key string) (data map[string]string) {
 }
 
 func (c *defaultKeyMapCache) SetKeyMaps(key string) error {
-	return c.client().HSet(c.cacheKey, key, "1").Err()
+	return c.client.HSet(c.cacheKey, key, "1").Err()
 }
 
 func (c *defaultKeyMapCache) DelKeyMaps(key ...string) error {
-	return c.client().HDel(c.cacheKey, key...).Err()
+	return c.client.HDel(c.cacheKey, key...).Err()
+}
+
+func (c *defaultKeyMapCache) Exists(key string) (bool, error) {
+	return c.client.HExists(c.cacheKey, key).Result()
 }
