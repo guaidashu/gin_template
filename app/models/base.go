@@ -158,6 +158,26 @@ func NewExcept(list ...string) map[string]int64 {
 	return m
 }
 
+var structMap = map[reflect.Kind]reflect.Kind{
+	reflect.Bool:       reflect.Bool,
+	reflect.Int:        reflect.Int,
+	reflect.Int8:       reflect.Int8,
+	reflect.Int16:      reflect.Int16,
+	reflect.Int32:      reflect.Int32,
+	reflect.Int64:      reflect.Int64,
+	reflect.Uint:       reflect.Uint,
+	reflect.Uint8:      reflect.Uint8,
+	reflect.Uint16:     reflect.Uint16,
+	reflect.Uint32:     reflect.Uint32,
+	reflect.Uint64:     reflect.Uint64,
+	reflect.Uintptr:    reflect.Uintptr,
+	reflect.Float32:    reflect.Float32,
+	reflect.Float64:    reflect.Float64,
+	reflect.Complex64:  reflect.Complex64,
+	reflect.Complex128: reflect.Complex128,
+	reflect.String:     reflect.String,
+}
+
 type Struct2MapValue struct {
 	Value reflect.Value
 	Type  reflect.Type
@@ -198,7 +218,8 @@ func struct2Map(v interface{}, except map[string]int64, maps map[string]interfac
 		val = reflect.ValueOf(v)
 	}
 
-	if kd := vt.Kind(); kd != reflect.Struct {
+	kd := vt.Kind()
+	if kd != reflect.Struct {
 		if kd := vt.Elem().Kind(); kd != reflect.Struct {
 			return nil, errors.New("the param is not a struct, please make sure")
 		} else {
@@ -228,54 +249,73 @@ func struct2Map(v interface{}, except map[string]int64, maps map[string]interfac
 		}
 
 		_, ok := except[vt.Field(i).Name]
-		switch val.Field(i).Type().String() {
-		case "string":
-			if val.Field(i).String() != "" || ok {
-				data[fieldName] = val.Field(i).String()
-			}
-		case "*string":
-			if val.Field(i).IsNil() {
-				continue
-			}
-			data[fieldName] = val.Field(i).Elem().String()
-
-		case "*int64", "*int32", "*int16", "*int8", "*int":
-			if val.Field(i).IsNil() {
-				continue
-			}
-			data[fieldName] = val.Field(i).Elem().Int()
-
-		case "*uint64", "*uint32", "*uint16", "*uint8", "*uint":
-			if val.Field(i).IsNil() {
-				continue
-			}
-			data[fieldName] = val.Field(i).Elem().Uint()
-
-		case "uint64", "uint32", "uint16", "uint8", "uint":
-			if val.Field(i).Uint() != 0 || ok {
-				data[fieldName] = val.Field(i).Uint()
-			}
-
-		case "int64", "int32", "int16", "int8", "int":
-			if val.Field(i).Int() != 0 || ok {
-				data[fieldName] = val.Field(i).Int()
-			}
-		case "float64", "float32":
-			if val.Field(i).Float() != 0 || ok {
-				data[fieldName] = val.Field(i).Float()
-			}
-		case "*float64", "*float32":
-			if val.Field(i).IsNil() {
-				continue
-			}
-			data[fieldName] = val.Field(i).Elem().Float()
-		default:
+		d, cycle := getStructData(val, i, ok, val.Field(i).Type().String())
+		if cycle {
 			data, _ = struct2Map(val.Field(i), except, data, Struct2MapValue{
 				Value: val.Field(i),
 				Type:  vt.Field(i).Type,
 			})
 		}
+		if d != nil {
+			data[fieldName] = d
+		}
 	}
 
 	return
+}
+
+func getStructData(val reflect.Value, i int, ok bool, typeName string) (interface{}, bool) {
+	switch typeName {
+	case "string":
+		if val.Field(i).String() != "" || ok {
+			return val.Field(i).String(), false
+		}
+	case "*string":
+		if val.Field(i).IsNil() {
+			return nil, false
+		}
+		return val.Field(i).Elem().String(), false
+
+	case "*int64", "*int32", "*int16", "*int8", "*int":
+		if val.Field(i).IsNil() {
+			return nil, false
+		}
+		return val.Field(i).Elem().Int(), false
+
+	case "*uint64", "*uint32", "*uint16", "*uint8", "*uint":
+		if val.Field(i).IsNil() {
+			return nil, false
+		}
+		return val.Field(i).Elem().Uint(), false
+
+	case "uint64", "uint32", "uint16", "uint8", "uint":
+		if val.Field(i).Uint() != 0 || ok {
+			return val.Field(i).Uint(), false
+		}
+
+	case "int64", "int32", "int16", "int8", "int":
+		if val.Field(i).Int() != 0 || ok {
+			return val.Field(i).Int(), false
+		}
+	case "float64", "float32":
+		if val.Field(i).Float() != 0 || ok {
+			return val.Field(i).Float(), false
+		}
+	case "*float64", "*float32":
+		if val.Field(i).IsNil() {
+			return nil, false
+		}
+		return val.Field(i).Elem().Float(), false
+	case "time.Time", "*time.Time":
+		return nil, false
+	default:
+		k := val.Field(i).Kind()
+		if _, existKd := structMap[k]; existKd {
+			return getStructData(val, i, ok, k.String())
+		}
+
+		return nil, true
+	}
+
+	return nil, false
 }
