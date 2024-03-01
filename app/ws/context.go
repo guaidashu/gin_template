@@ -30,6 +30,10 @@ func (c *Context) SetClient(clientId string, client *Client) {
 	c.client = client
 }
 
+func (c *Context) Client() *Client {
+	return c.client
+}
+
 func (c *Context) SetEvent(event enum.WsEventEnum) {
 	c.event = event
 }
