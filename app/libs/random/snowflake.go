@@ -24,7 +24,7 @@ const (
 
 type (
 	Snowflake struct {
-		*sync.Mutex        // 锁
+		sync.Mutex         // 锁
 		timestamp    int64 // 时间戳 ，毫秒
 		workerId     int64 // 工作节点
 		datacenterId int64 // 数据中心机房id
@@ -40,7 +40,7 @@ var (
 func NewSnowflake() *Snowflake {
 	_snowflakeOnce.Do(func() {
 		_snowflake = &Snowflake{
-			Mutex: &sync.Mutex{},
+			Mutex: sync.Mutex{},
 		}
 	})
 
