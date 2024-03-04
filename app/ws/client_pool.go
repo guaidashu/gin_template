@@ -3,6 +3,7 @@ package ws
 import (
 	"fmt"
 	"gin_template/app/enum"
+	"gin_template/app/libs"
 	"sync"
 )
 
@@ -54,6 +55,7 @@ func (c *ClientPool) registerClient() {
 		case register := <-c.register:
 			c.clientsLock.Lock()
 			c.clients[register.name] = register
+			libs.Logger.Info("成功建立连接，name为：", register.name, "成功后的总连接数：", len(c.clients))
 			c.clientsLock.Unlock()
 		}
 	}
@@ -64,10 +66,21 @@ func (c *ClientPool) unregisterClient() {
 		select {
 		case unregister := <-c.unregister:
 			c.clientsLock.Lock()
-			delete(c.clients, unregister.name)
+			c.removeUnregister(unregister.name)
 			c.clientsLock.Unlock()
 		}
 	}
+}
+
+func (c *ClientPool) removeUnregister(name string) {
+	defer func() {
+		rc := recover()
+		if rc != nil {
+			libs.Logger.Error("removeUnregister ====================> 移除client失败")
+		}
+	}()
+
+	delete(c.clients, name)
 }
 
 func (c *ClientPool) Get(name string) *Client {
@@ -75,6 +88,10 @@ func (c *ClientPool) Get(name string) *Client {
 	defer func() {
 		c.clientsLock.RUnlock()
 	}()
+
+	if _, ok := c.clients[name]; !ok {
+		return nil
+	}
 
 	return c.clients[name]
 }
@@ -84,6 +101,10 @@ func (c *ClientPool) GetChannel(channel enum.WsChannelEnum) map[string]*Client {
 	defer func() {
 		c.clientsChannelLock.RUnlock()
 	}()
+
+	if _, ok := c.clientsChannel[string(channel)]; !ok {
+		return nil
+	}
 
 	return c.clientsChannel[string(channel)]
 }
@@ -116,6 +137,9 @@ func (c *ClientPool) SetChannel(name, channel string) {
 	defer func() {
 		c.clientsLock.RUnlock()
 	}()
+	if _, ok := c.clients[name]; !ok {
+		return
+	}
 
 	c.clients[name].channel = append(c.clients[name].channel, channel)
 	c.clientsChannel[channel][name] = c.clients[name]
@@ -144,17 +168,24 @@ func (c *ClientPool) RemoveClient(name string, channels []string) {
 		c.clientsChannelLock.Unlock()
 	}()
 
-	// 移除clients的client
-	c.unregister <- c.clients[name]
-
 	// 移除channel池的client
 	for _, channel := range channels {
 		if _, ok := c.clientsChannel[channel]; !ok {
 			continue
 		}
 
+		if _, ok := c.clientsChannel[channel][name]; !ok {
+			continue
+		}
+
 		delete(c.clientsChannel[channel], name)
 	}
+
+	if _, ok := c.clients[name]; !ok {
+		return
+	}
+	// 移除clients的client
+	c.unregister <- c.clients[name]
 }
 
 // 广播
@@ -169,4 +200,13 @@ func (c *ClientPool) Broadcast() {
 
 func (c *ClientPool) broadcast(data []byte) {
 	fmt.Println("广播数据：", string(data))
+}
+
+func (c *ClientPool) GetCount() int {
+	c.clientsLock.RLock()
+	defer func() {
+		c.clientsLock.RUnlock()
+	}()
+
+	return len(c.clients)
 }
