@@ -34,7 +34,7 @@ type (
 		// websocket处理函数
 		handle func(name string, data []byte, close func())
 		// 等待组
-		wait *sync.WaitGroup
+		wait sync.WaitGroup
 		// 此客户端所存在的channel
 		channel []string
 		// 此客户端名(由雪花算法计算而来)
@@ -136,7 +136,7 @@ func NewClient(conn *websocket.Conn) *Client {
 		conn: conn,
 		stop: make(chan int),
 		send: make(chan *data_struct.WsResponse),
-		wait: &sync.WaitGroup{},
+		wait: sync.WaitGroup{},
 		name: fmt.Sprintf("%v", random.GetSnowflake()),
 	}
 	client.wait.Add(2)
