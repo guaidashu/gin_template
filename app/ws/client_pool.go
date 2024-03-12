@@ -53,23 +53,44 @@ func (c *ClientPool) registerClient() {
 	for {
 		select {
 		case register := <-c.register:
-			c.clientsLock.Lock()
-			c.clients[register.name] = register
-			libs.Logger.Info("成功建立连接，name为：", register.name, "成功后的总连接数：", len(c.clients))
-			c.clientsLock.Unlock()
+			c._registerClient(register)
 		}
 	}
+}
+
+func (c *ClientPool) _registerClient(register *Client) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			libs.Logger.Error("_registerClient 出现panic, err: ", r)
+		}
+	}()
+
+	c.clientsLock.Lock()
+	defer func() {
+		c.clientsLock.Unlock()
+	}()
+
+	c.clients[register.name] = register
+	libs.Logger.Info("成功建立连接，name为：", register.name, "成功后的总连接数：", len(c.clients))
 }
 
 func (c *ClientPool) unregisterClient() {
 	for {
 		select {
 		case unregister := <-c.unregister:
-			c.clientsLock.Lock()
-			c.removeUnregister(unregister.name)
-			c.clientsLock.Unlock()
+			c._unregisterClient(unregister)
 		}
 	}
+}
+
+func (c *ClientPool) _unregisterClient(unregister *Client) {
+	c.clientsLock.Lock()
+	defer func() {
+		c.clientsLock.Unlock()
+	}()
+
+	c.removeUnregister(unregister.name)
 }
 
 func (c *ClientPool) removeUnregister(name string) {
@@ -86,6 +107,11 @@ func (c *ClientPool) removeUnregister(name string) {
 func (c *ClientPool) Get(name string) *Client {
 	c.clientsLock.RLock()
 	defer func() {
+		r := recover()
+		if r != nil {
+			libs.Logger.Error("Get Client 出现panic, err: ", r)
+		}
+
 		c.clientsLock.RUnlock()
 	}()
 
@@ -99,6 +125,11 @@ func (c *ClientPool) Get(name string) *Client {
 func (c *ClientPool) GetChannel(channel enum.WsChannelEnum) map[string]*Client {
 	c.clientsChannelLock.RLock()
 	defer func() {
+		r := recover()
+		if r != nil {
+			libs.Logger.Error("GetChannel 出现panic, err: ", r)
+		}
+
 		c.clientsChannelLock.RUnlock()
 	}()
 
@@ -112,6 +143,11 @@ func (c *ClientPool) GetChannel(channel enum.WsChannelEnum) map[string]*Client {
 func (c *ClientPool) GetByChannel(name string, channel enum.WsChannelEnum) *Client {
 	c.clientsChannelLock.RLock()
 	defer func() {
+		r := recover()
+		if r != nil {
+			libs.Logger.Error("GetByChannel 出现panic, err: ", r)
+		}
+
 		c.clientsChannelLock.RUnlock()
 	}()
 
@@ -126,6 +162,11 @@ func (c *ClientPool) GetByChannel(name string, channel enum.WsChannelEnum) *Clie
 func (c *ClientPool) SetChannel(name, channel string) {
 	c.clientsChannelLock.Lock()
 	defer func() {
+		r := recover()
+		if r != nil {
+			libs.Logger.Error("SetChannel 出现panic, err: ", r)
+		}
+
 		c.clientsChannelLock.Unlock()
 	}()
 
@@ -149,6 +190,11 @@ func (c *ClientPool) SetChannel(name, channel string) {
 func (c *ClientPool) CloseAllClients() {
 	c.clientsLock.Lock()
 	defer func() {
+		r := recover()
+		if r != nil {
+			libs.Logger.Error("CloseAllClients 出现panic, err: ", r)
+		}
+
 		c.clientsLock.Unlock()
 	}()
 
@@ -160,7 +206,15 @@ func (c *ClientPool) CloseAllClients() {
 func (c *ClientPool) RemoveClient(name string, channels []string) {
 	c.clientsLock.RLock()
 	defer func() {
+		r := recover()
+		if r != nil {
+			libs.Logger.Error("RemoveClient 出现panic, err: ", r)
+		}
+
 		c.clientsLock.RUnlock()
+
+		// 移除clients的client
+		c.unregister <- c.clients[name]
 	}()
 
 	c.clientsChannelLock.Lock()
@@ -184,8 +238,6 @@ func (c *ClientPool) RemoveClient(name string, channels []string) {
 	if _, ok := c.clients[name]; !ok {
 		return
 	}
-	// 移除clients的client
-	c.unregister <- c.clients[name]
 }
 
 // 广播
