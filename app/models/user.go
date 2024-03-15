@@ -181,11 +181,6 @@ func (model *defaultUserModel) GetUserById(Id int64) (userModel *UserModel, err 
 		return
 	}
 
-	if userModel.DeletedAt.Unix() > 1 {
-		err = gorm.ErrRecordNotFound
-		return
-	}
-
 	return
 }
 

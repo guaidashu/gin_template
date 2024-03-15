@@ -25,7 +25,7 @@ type (
 		CreatedAt time.Time `gorm:"column:created_at" json:"created_at"`
 		// 更新时间
 		UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at"`
-		// 删除时间
+		// 删除时间(加上此字段则会默认软删除)
 		DeletedAt time.Time `gorm:"column:deleted_at" json:"deleted_at"`
 	}
 )
@@ -73,7 +73,6 @@ func (model *defaultTemplateModel) CreateTable() error {
 
 // 创建数据并返回本次插入的ID
 func (model *defaultTemplateModel) Create(templateModel *TemplateModel) (err error) {
-    templateModel.DeletedAt = time.Unix(1, 0)
 	db := model.getDB().Create(templateModel)
 	if err = db.Error; err != nil {
 		return
@@ -155,11 +154,6 @@ func (model *defaultTemplateModel) MinUpdate(templateModel *TemplateModel, excep
 func (model *defaultTemplateModel) GetTemplateIdById(Id int64) (templateModel *TemplateModel, err error) {
 	templateModel, err = model.FindOne(Id)
 	if err != nil {
-		return
-	}
-
-	if templateModel.DeletedAt.Unix() > 1 {
-		err = gorm.ErrRecordNotFound
 		return
 	}
 

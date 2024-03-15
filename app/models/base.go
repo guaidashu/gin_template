@@ -10,7 +10,6 @@ import (
 	"gin_template/app/enum"
 	"gorm.io/gorm"
 	"reflect"
-	"time"
 )
 
 type BaseModel interface {
@@ -30,18 +29,7 @@ type Model struct {
 // 统一是软删除
 // 获取未删除db 实例
 func getTableWithNoDeleted(gdb *gorm.DB, tableName string) *gorm.DB {
-	db := gdb.Table(tableName)
-	if db != nil {
-		loc, _ := time.LoadLocation("Local")
-		theTime, _ := time.ParseInLocation("2006-01-02 15:04:05", "1970-01-01 08:00:01", loc)
-		db = db.Where("deleted_at = ?", theTime)
-	}
-	// 数据库存整数时间戳时打开注释(适用于要根据时间排序的业务)
-	// if db != nil {
-	// 	db = db.Where("deleted_at = ?", 0)
-	// }
-
-	return db
+	return gdb.Table(tableName).Unscoped()
 }
 
 // 获取所有数据(不论是否被删除) db实例

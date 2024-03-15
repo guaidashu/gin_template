@@ -43,9 +43,9 @@ type (
 // NewSmsCache 创建短信缓存类
 func NewSmsCache() SmsCache {
 	return &defaultSmsCache{
-		codeKey:        "gogo:sms:code:%s",
-		ipLimitKey:     "gogo:sms:ipLimit:%s",
-		mobileLimitKey: "gogo:sms:mobileLimit:%s",
+		codeKey:        "gin_template:sms:code:%s",
+		ipLimitKey:     "gin_template:sms:ipLimit:%s",
+		mobileLimitKey: "gin_template:sms:mobileLimit:%s",
 	}
 }
 

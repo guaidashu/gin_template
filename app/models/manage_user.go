@@ -138,11 +138,6 @@ func (model *defaultManageUserModel) GetManageUserById(manageUserId int64) (mana
 		return
 	}
 
-	if manageUserModel.DeletedAt.Unix() > 0 {
-		err = gorm.ErrRecordNotFound
-		return
-	}
-
 	return
 }
 
