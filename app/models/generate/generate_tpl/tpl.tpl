@@ -26,7 +26,7 @@ type (
 		// 更新时间
 		UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at"`
 		// 删除时间(加上此字段则会默认软删除)
-		DeletedAt time.Time `gorm:"column:deleted_at" json:"deleted_at"`
+		DeletedAt gorm.DeletedAt `gorm:"column:deleted_at" json:"deleted_at"`
 	}
 )
 
