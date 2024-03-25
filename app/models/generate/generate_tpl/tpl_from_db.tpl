@@ -96,7 +96,7 @@ func (model *defaultTemplateModel) Update(templateModel *TemplateModel) error {
 
 	// 更新
 	db := model.getDB()
-	err := db.Where("id = ?", templateModel.Id).Save(templateModel).Error
+	err = db.Where("id = ?", templateModel.Id).Save(templateModel).Error
 	if err != nil {
 		err = serror.NewErr().SetErr(err)
 		return err
