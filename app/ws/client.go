@@ -124,6 +124,10 @@ func (c *Client) Send(event enum.WsEventEnum, data interface{}) {
 	c.send <- resp
 }
 
+func (c *Client) GetUserId() int64 {
+	return c.userId
+}
+
 func (c *Client) Run(handle func(name string, data []byte, close func())) {
 	c.handle = handle
 
