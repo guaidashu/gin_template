@@ -118,7 +118,7 @@ func (s *defaultWsSrv) handler(req *data_struct.WsRequest) {
 		return
 	}
 
-	ctx.Set("token", req.Token)
+	ctx.Set("req", req)
 	// 注册到了handlers里，取出进行调用
 	handler := s.handlers[req.Event]
 

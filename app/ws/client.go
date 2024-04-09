@@ -39,6 +39,8 @@ type (
 		channel []string
 		// 此客户端名(由雪花算法计算而来)
 		name string
+		// 用户id 用来进行关闭连接时删除用户连接池的数据
+		userId int64
 	}
 )
 
@@ -75,7 +77,10 @@ func (c *Client) writer() {
 	ticker := time.NewTicker(pingPeriod)
 
 	defer func() {
-		_ = recover() // 防止崩溃
+		rcv := recover() // 防止崩溃
+		if rcv != nil {
+			libs.Logger.Error("用户client writer写操作崩溃, err: ", rcv)
+		}
 		_ = c.conn.Close()
 		ticker.Stop()
 		c.wait.Done()

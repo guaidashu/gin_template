@@ -19,6 +19,8 @@ type (
 		clientsLock sync.RWMutex
 		// 客户端连接池
 		clients map[string]*Client
+		// 通过用户id获取的连接池
+		clientsUser map[int64]*Client
 		// channel客户端连接池读写锁
 		clientsChannelLock sync.RWMutex
 		// channel客户端连接池 (精确到每一个channel组)， 暂时不启用
@@ -36,6 +38,7 @@ func NewClientPool() *ClientPool {
 	_clientPoolOnce.Do(func() {
 		_clientPool = &ClientPool{
 			clients:        make(map[string]*Client),
+			clientsUser:    make(map[int64]*Client),
 			clientsChannel: make(map[string]map[string]*Client),
 			send:           make(chan []byte),
 			register:       make(chan *Client),
@@ -47,6 +50,26 @@ func NewClientPool() *ClientPool {
 	})
 
 	return _clientPool
+}
+
+func (c *ClientPool) SetClientByUserId(name string, userId int64) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			libs.Logger.Error("SetClientByUserId 出现panic, err: ", r)
+		}
+	}()
+
+	c.clientsLock.Lock()
+	defer func() {
+		c.clientsLock.Unlock()
+	}()
+
+	if _, ok := c.clients[name]; !ok {
+		return
+	}
+
+	c.clientsUser[userId] = c.clients[name]
 }
 
 func (c *ClientPool) registerClient() {
@@ -97,9 +120,17 @@ func (c *ClientPool) removeUnregister(name string) {
 	defer func() {
 		rc := recover()
 		if rc != nil {
-			libs.Logger.Error("removeUnregister ====================> 移除client失败")
+			libs.Logger.Error("removeUnregister ====================> 移除client失败, err: ", rc)
 		}
 	}()
+
+	if _, ok := c.clients[name]; !ok {
+		return
+	}
+
+	if c.clients[name].userId != 0 {
+		delete(c.clientsUser, c.clients[name].userId)
+	}
 
 	delete(c.clients, name)
 }
@@ -261,4 +292,17 @@ func (c *ClientPool) GetCount() int {
 	}()
 
 	return len(c.clients)
+}
+
+func (c *ClientPool) GetByUserId(userId int64) *Client {
+	c.clientsLock.RLock()
+	defer func() {
+		c.clientsLock.RUnlock()
+	}()
+
+	if _, ok := c.clientsUser[userId]; !ok {
+		return nil
+	}
+
+	return c.clientsUser[userId]
 }

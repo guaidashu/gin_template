@@ -8,6 +8,7 @@
 package middlewares
 
 import (
+	"gin_template/app/data_struct"
 	"gin_template/app/enum"
 	"gin_template/app/libs"
 	jwt2 "gin_template/app/libs/jwt"
@@ -105,12 +106,14 @@ func ValidateWsToken(ctx *ws.Context) error {
 		auth = jwt2.NewJwtToken()
 	)
 
-	tokenInterface, err := ctx.Get("token")
-	if err != nil {
+	reqInterface, err := ctx.Get("req")
+	if err != nil || reqInterface == nil {
 		return err
 	}
 
-	token := tokenInterface.(string)
+	req := reqInterface.(*data_struct.WsRequest)
+
+	token := req.Token
 	if token == "" {
 		err := serror.ErrNoAuth
 		libs.Logger.Error(err.String())
