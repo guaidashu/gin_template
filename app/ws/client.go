@@ -21,12 +21,17 @@ const (
 
 	// Send pings to peer with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
+
+	// Maximum message size allowed from peer.
+	maxMessageSize = 512
 )
 
 type (
 	Client struct {
 		// 客户端链接
 		conn *websocket.Conn
+		// 客户端状态 0 为正常， 1为关闭
+		status int64
 		// 终止标识channel
 		stop chan int
 		// 要发送给客户端的信息
@@ -41,8 +46,19 @@ type (
 		name string
 		// 用户id 用来进行关闭连接时删除用户连接池的数据
 		userId int64
+		// 凭证，用于鉴权
+		certification string
 	}
 )
+
+func (c *Client) SetCertification(certification string) {
+	libs.Logger.Info("设置certification: ", certification)
+	c.certification = certification
+}
+
+func (c *Client) Certification() string {
+	return c.certification
+}
 
 func (c *Client) reader() {
 	defer func() {
@@ -64,7 +80,7 @@ func (c *Client) reader() {
 		_, data, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				libs.Logger.Info(fmt.Printf("read message error: %v", err))
+				libs.Logger.Info(fmt.Sprintf("read message error: %v", err))
 			}
 			break
 		}
@@ -83,6 +99,7 @@ func (c *Client) writer() {
 		}
 		_ = c.conn.Close()
 		ticker.Stop()
+		close(c.send)
 		c.wait.Done()
 		libs.Logger.Info("close writer! ")
 	}()
@@ -111,11 +128,29 @@ func (c *Client) writer() {
 }
 
 func (c *Client) close() {
+	defer func() {
+		rcv := recover()
+		if rcv != nil {
+			libs.Logger.Error("close ws(关闭ws失败) panic, err: ", rcv)
+		}
+	}()
+
 	_ = c.conn.WriteMessage(websocket.CloseMessage, nil)
 	_ = c.conn.Close()
 }
 
 func (c *Client) Send(event enum.WsEventEnum, data interface{}) {
+	defer func() {
+		rcv := recover()
+		if rcv != nil {
+			libs.Logger.Error("发送client消息失败，recover: ", rcv)
+		}
+	}()
+	if c.status == 1 {
+		libs.Logger.Warning("用户已经关闭client，此次不发送")
+		return
+	}
+
 	resp := &data_struct.WsResponse{
 		Event: event,
 		Data:  data,
@@ -142,11 +177,12 @@ func (c *Client) Run(handle func(name string, data []byte, close func())) {
 
 func NewClient(conn *websocket.Conn) *Client {
 	client := &Client{
-		conn: conn,
-		stop: make(chan int),
-		send: make(chan *data_struct.WsResponse),
-		wait: sync.WaitGroup{},
-		name: fmt.Sprintf("%v", random.GetSnowflake()),
+		conn:    conn,
+		stop:    make(chan int),
+		send:    make(chan *data_struct.WsResponse),
+		wait:    sync.WaitGroup{},
+		name:    fmt.Sprintf("%v", random.GetSnowflake()),
+		channel: make([]string, 0),
 	}
 	client.wait.Add(2)
 

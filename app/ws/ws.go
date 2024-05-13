@@ -58,19 +58,30 @@ func (s *defaultWsSrv) Handler(name string, data []byte, close func()) {
 		wsData := &data_struct.WsSubscribe{}
 		err = json.Unmarshal([]byte(req.Data), wsData)
 		if err != nil {
-			s.clientPool.Get(name).Send(enum.WsSubscribeEvent, "错误的订阅格式")
+			client := s.clientPool.Get(name)
+			if client != nil {
+				client.Send(enum.WsSubscribeEvent, "错误的订阅格式")
+			}
+
 			return
 		}
 
 		// 写入channel
 		s.clientPool.SetChannel(name, wsData.Channel)
-		s.clientPool.Get(name).Send(enum.WsSubscribeEvent, "ok")
+		client := s.clientPool.Get(name)
+		if client != nil {
+			client.Send(enum.WsSubscribeEvent, "ok")
+		}
 		return
 	case enum.WsCloseEvent: // 关闭连接
 		close()
 		return
 	case enum.WsPongEvent:
-		s.clientPool.Get(name).Send(enum.WsPongEvent, "ok")
+		client := s.clientPool.Get(name)
+		if client != nil {
+			client.Send(enum.WsPongEvent, "ok")
+		}
+
 		return
 	}
 
@@ -102,6 +113,10 @@ func (s *defaultWsSrv) Register(eventName enum.WsEventEnum, handlerFunc WsHandle
 
 func (s *defaultWsSrv) handler(req *data_struct.WsRequest) {
 	client := s.clientPool.Get(req.WsId)
+	if client == nil {
+		return
+	}
+
 	ctx := NewContext()
 	ctx.SetClient(req.WsId, client)
 	ctx.SetData([]byte(req.Data))

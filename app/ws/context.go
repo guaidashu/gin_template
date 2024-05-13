@@ -30,10 +30,6 @@ func (c *Context) SetClient(clientId string, client *Client) {
 	c.client = client
 }
 
-func (c *Context) Client() *Client {
-	return c.client
-}
-
 func (c *Context) ClientId() string {
 	return c.clientId
 }
@@ -73,6 +69,13 @@ func (c *Context) OriginData() []byte {
 }
 
 func (c *Context) send(data interface{}) {
+	defer func() {
+		rc := recover()
+		if rc != nil {
+			libs.Logger.Error("Send panic ========> err: %v", rc)
+		}
+	}()
+
 	if c.client == nil {
 		libs.Logger.Error(fmt.Sprintf("客户端 %v 已断开", c.clientId))
 		return
@@ -87,6 +90,10 @@ func (c *Context) Send(data interface{}) {
 
 func (c *Context) Error(err error) {
 	c.send(libs.GetErrorReply(err))
+}
+
+func (c *Context) Client() *Client {
+	return c.client
 }
 
 func (c *Context) BindJson(obj interface{}) error {

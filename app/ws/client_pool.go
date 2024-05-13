@@ -113,6 +113,8 @@ func (c *ClientPool) _unregisterClient(unregister *Client) {
 		c.clientsLock.Unlock()
 	}()
 
+	// 状态改为关闭
+	unregister.status = 1
 	c.removeUnregister(unregister.name)
 }
 

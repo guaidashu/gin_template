@@ -18,7 +18,6 @@ type WsEventHandler struct {
 	Middlewares []WsHandlerMiddleware
 }
 
-// 中间件注册
 func (w *WsEventHandler) Use(middlewares ...WsHandlerMiddleware) *WsEventHandler {
 	w.Middlewares = append(w.Middlewares, middlewares...)
 	return w
