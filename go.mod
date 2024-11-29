@@ -6,7 +6,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.4.0
 	github.com/go-redis/redis v6.15.9+incompatible
-	github.com/gogo/protobuf v1.2.0
+	github.com/gogo/protobuf v1.3.2
 	github.com/gorilla/websocket v1.5.0
 	github.com/guaidashu/go_helper v0.0.0-20191027154739-f877eaf34227
 	github.com/guaidashu/go_mongodb_yy v0.0.0-20191022125728-322d2a848ba9
