@@ -17,11 +17,12 @@ import (
 	"gin_template/app/libs/miniprogram"
 	"gin_template/app/libs/serror"
 	"gin_template/app/models"
-	jwt2 "github.com/dgrijalva/jwt-go"
-	"github.com/guaidashu/go_helper/crypto_tool"
-	"gorm.io/gorm"
 	"sync"
 	"time"
+
+	jwt2 "github.com/golang-jwt/jwt/v5"
+	"github.com/guaidashu/go_helper/crypto_tool"
+	"gorm.io/gorm"
 )
 
 type (

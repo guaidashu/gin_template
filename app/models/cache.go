@@ -8,11 +8,13 @@
 package models
 
 import (
+	"context"
 	"encoding/json"
 	"gin_template/app/rds"
-	"github.com/go-redis/redis"
-	"gorm.io/gorm"
 	"time"
+
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 // 默认过期时间
@@ -53,6 +55,7 @@ func (c *CacheConn) QueryRow(v interface{}, key string, db *gorm.DB, fn QueryFn)
 
 // 具体的redis 操作
 func (c *CacheConn) GetResult(v interface{}, key string, query func(v interface{}) error) error {
+	ctx := context.Background()
 	// 加分布式锁, 防止缓存击穿
 	lock := rds.NewRedisLock("get-" + key)
 	if ok, err := lock.Acquire(); !ok {
@@ -63,7 +66,7 @@ func (c *CacheConn) GetResult(v interface{}, key string, query func(v interface{
 	}()
 
 	// 先从redis获取数据
-	val, err := c.cache.Get(key).Result()
+	val, err := c.cache.Get(ctx, key).Result()
 	switch err {
 	case redis.Nil:
 		// 从数据库获取
@@ -80,7 +83,7 @@ func (c *CacheConn) GetResult(v interface{}, key string, query func(v interface{
 		// 设置缓存
 		if val == "*" {
 			// not found的缓存应该未一分钟
-			err = c.cache.Set(key, val, defaultNotFoundExpiry).Err()
+			err = c.cache.Set(ctx, key, val, defaultNotFoundExpiry).Err()
 			if err != nil {
 				return err
 			}
@@ -91,7 +94,7 @@ func (c *CacheConn) GetResult(v interface{}, key string, query func(v interface{
 		if err != nil {
 			return err
 		}
-		return c.cache.Set(key, string(b), defaultExpiry).Err()
+		return c.cache.Set(ctx, key, string(b), defaultExpiry).Err()
 	case nil:
 		if val == "*" {
 			v = nil
@@ -106,5 +109,6 @@ func (c *CacheConn) GetResult(v interface{}, key string, query func(v interface{
 
 // DelCache deletes cache with keys.
 func (c *CacheConn) DelCache(keys ...string) error {
-	return c.cache.Del(keys...).Err()
+	ctx := context.Background()
+	return c.cache.Del(ctx, keys...).Err()
 }

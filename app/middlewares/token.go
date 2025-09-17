@@ -16,8 +16,8 @@ import (
 	"gin_template/app/ws"
 	"net/http"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // 用户token验证

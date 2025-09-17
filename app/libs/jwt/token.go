@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type Token struct {
@@ -23,7 +23,7 @@ type Token struct {
 }
 
 type CustomClaims struct {
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 	// 追加自己需要的信息
 	UserId  int64 `json:"user_id"`
 	GenType int64 `json:"gen_type"`
@@ -99,8 +99,8 @@ func (j *Token) GenerateToken(userId int64, generateType ...int64) (token string
 
 	secretKeyByte := []byte(j.secretKey)
 	claims = &CustomClaims{
-		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * time.Duration(j.expireTime)).Unix(),
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(j.expireTime))),
 			Issuer:    j.Issuer,
 		},
 		userId,

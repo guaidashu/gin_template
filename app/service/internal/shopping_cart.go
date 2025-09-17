@@ -9,8 +9,9 @@ package internal
 
 import (
 	"gin_template/app/rds"
-	"github.com/go-redis/redis"
 	"sync"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type (

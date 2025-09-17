@@ -9,9 +9,9 @@ import (
 	"gin_template/app/data_struct/_interface"
 	"gin_template/app/enum"
 	"gin_template/app/libs"
-	"github.com/go-redis/redis"
-)
 
+	"github.com/redis/go-redis/v9"
+)
 
 // redis 模块包
 type RedisInit struct{}

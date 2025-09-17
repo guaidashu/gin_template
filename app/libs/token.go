@@ -9,9 +9,10 @@ package libs
 
 import (
 	"gin_template/app/config"
-	"github.com/dgrijalva/jwt-go"
 	"sync"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type JwtToken struct {
@@ -20,7 +21,7 @@ type JwtToken struct {
 }
 
 type jwtCustomClaims struct {
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 	// 追加自己需要的信息
 	UserId int64 `json:"user_id"`
 }
@@ -47,8 +48,8 @@ func (j *JwtToken) GenerateToken(userId int64, secretKey, issuer string) (token 
 	secretKeyByte := []byte(secretKey)
 
 	claims := &jwtCustomClaims{
-		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * time.Duration(j.expireTime)).Unix(),
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(j.expireTime))),
 			Issuer:    issuer,
 		},
 		userId,

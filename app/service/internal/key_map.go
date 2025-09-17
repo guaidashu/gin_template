@@ -8,8 +8,9 @@
 package internal
 
 import (
-	"github.com/go-redis/redis"
 	"sync"
+
+	"github.com/redis/go-redis/v9"
 )
 
 // 键值维护模块
