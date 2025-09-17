@@ -177,7 +177,7 @@ func getFiledType(field Field) string {
 			return "int64"
 		}
 		return "int64"
-	case "bigint":
+	case "bigint", "bigint unsigned":
 		return "int64"
 	case "decimal", "double", "float", "real", "numeric":
 		return "float32"
