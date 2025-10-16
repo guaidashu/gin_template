@@ -8,6 +8,7 @@
 package service
 
 import (
+	"errors"
 	"gin_template/app/config"
 	"gin_template/app/data_struct"
 	"gin_template/app/data_struct/requests"
@@ -227,24 +228,19 @@ func (s *defaultLoginSrv) validateRefreshToken(refreshToken string) (
 	auth = jwt.NewJwtRefreshToken()
 	claims, err = auth.ParseToken(refreshToken)
 	if err != nil {
-		if e, ok := err.(*jwt2.ValidationError); ok {
-			switch e.Errors {
-			case jwt2.ValidationErrorExpired:
-				err = serror.NewErr().SetMsg("授权已过期").SetErr(err)
-				return
-			case jwt2.ValidationErrorClaimsInvalid,
-				jwt2.ValidationErrorSignatureInvalid,
-				jwt2.ValidationErrorNotValidYet,
-				jwt2.ValidationErrorId,
-				jwt2.ValidationErrorIssuedAt,
-				jwt2.ValidationErrorIssuer:
-				err = serror.NewErr().SetMsg("无效授权").SetErr(err)
-				return
-			}
+		switch {
+		case errors.Is(err, jwt2.ErrTokenExpired):
+			err = serror.NewErr().SetMsg("授权已过期").SetErr(err)
+			return
+		case errors.Is(err, jwt2.ErrTokenNotValidYet),
+			errors.Is(err, jwt2.ErrTokenMalformed),
+			errors.Is(err, jwt2.ErrTokenSignatureInvalid):
+			err = serror.NewErr().SetMsg("无效授权").SetErr(err)
+			return
+		default:
+			err = serror.NewErr().SetMsg("无效授权").SetErr(err)
+			return
 		}
-
-		err = serror.NewErr().SetMsg("无效授权").SetErr(err)
-		return
 	}
 
 	isValid = true

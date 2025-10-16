@@ -8,6 +8,7 @@
 package internal
 
 import (
+	"context"
 	"sync"
 
 	"github.com/redis/go-redis/v9"
@@ -55,7 +56,8 @@ func NewKeyMapCache(cacheKey string, client *redis.Client) KeyMapCache {
 
 func (c *defaultKeyMapCache) GetKeyMaps() (data map[string]string) {
 	data = make(map[string]string)
-	val, err := c.client.HGetAll(c.cacheKey).Result()
+	ctx := context.Background()
+	val, err := c.client.HGetAll(ctx, c.cacheKey).Result()
 	if err != nil || val == nil {
 		return
 	}
@@ -65,13 +67,16 @@ func (c *defaultKeyMapCache) GetKeyMaps() (data map[string]string) {
 }
 
 func (c *defaultKeyMapCache) SetKeyMaps(key string) error {
-	return c.client.HSet(c.cacheKey, key, "1").Err()
+	ctx := context.Background()
+	return c.client.HSet(ctx, c.cacheKey, key, "1").Err()
 }
 
 func (c *defaultKeyMapCache) DelKeyMaps(key ...string) error {
-	return c.client.HDel(c.cacheKey, key...).Err()
+	ctx := context.Background()
+	return c.client.HDel(ctx, c.cacheKey, key...).Err()
 }
 
 func (c *defaultKeyMapCache) Exists(key string) (bool, error) {
-	return c.client.HExists(c.cacheKey, key).Result()
+	ctx := context.Background()
+	return c.client.HExists(ctx, c.cacheKey, key).Result()
 }

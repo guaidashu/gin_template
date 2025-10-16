@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"context"
 	"fmt"
 	"gin_template/app/libs/datetime"
 	"gin_template/app/rds"
@@ -56,13 +57,14 @@ func (c *defaultSmsCache) client() *redis.Client {
 // SetCode 设置短信验证码缓存
 func (c *defaultSmsCache) SetCode(mobile, code string) error {
 	codeKey := fmt.Sprintf(c.codeKey, mobile)
+	ctx := context.Background()
 
-	_, err := c.client().Pipelined(func(pipe redis.Pipeliner) error {
-		pipe.HSet(codeKey, "code", code)
-		pipe.HSet(codeKey, "time", time.Now().Unix())
-		pipe.HSet(codeKey, "try", 0)
-		pipe.Expire(codeKey, 5*time.Minute)
-		_, e := pipe.Exec()
+	_, err := c.client().Pipelined(ctx, func(pipe redis.Pipeliner) error {
+		pipe.HSet(ctx, codeKey, "code", code)
+		pipe.HSet(ctx, codeKey, "time", time.Now().Unix())
+		pipe.HSet(ctx, codeKey, "try", 0)
+		pipe.Expire(ctx, codeKey, 5*time.Minute)
+		_, e := pipe.Exec(ctx)
 		return e
 	})
 	if err != nil {
@@ -74,13 +76,15 @@ func (c *defaultSmsCache) SetCode(mobile, code string) error {
 
 // GetCodeExpire 获取短信验证码过期时间
 func (c *defaultSmsCache) GetCodeExpire(mobile string) (int, error) {
-	t, err := c.client().TTL(fmt.Sprintf(c.codeKey, mobile)).Result()
+	ctx := context.Background()
+	t, err := c.client().TTL(ctx, fmt.Sprintf(c.codeKey, mobile)).Result()
 	return int(t), err
 }
 
 // GetCode 获取短信验证码
 func (c *defaultSmsCache) GetCode(mobile string) (string, error) {
-	val, err := c.client().HGet(fmt.Sprintf(c.codeKey, mobile), "code").Result()
+	ctx := context.Background()
+	val, err := c.client().HGet(ctx, fmt.Sprintf(c.codeKey, mobile), "code").Result()
 	if err != nil && err != redis.Nil {
 		return "", err
 	}
@@ -90,13 +94,15 @@ func (c *defaultSmsCache) GetCode(mobile string) (string, error) {
 
 // DelCode 删除短信验证码
 func (c *defaultSmsCache) DelCode(mobile string) error {
-	_, err := c.client().Del(fmt.Sprintf(c.codeKey, mobile)).Result()
+	ctx := context.Background()
+	_, err := c.client().Del(ctx, fmt.Sprintf(c.codeKey, mobile)).Result()
 	return err
 }
 
 // IncrCodeTry 增加验证码试错次数
 func (c *defaultSmsCache) IncrCodeTry(mobile string) (int64, error) {
-	return c.client().HIncrBy(fmt.Sprintf(c.codeKey, mobile), "try", 1).Result()
+	ctx := context.Background()
+	return c.client().HIncrBy(ctx, fmt.Sprintf(c.codeKey, mobile), "try", 1).Result()
 }
 
 // IncrMobileLimit 增加手机号次数限制次数
@@ -106,11 +112,12 @@ func (c *defaultSmsCache) IncrMobileLimit(mobile string) (int, error) {
 		mobileLimitKey = fmt.Sprintf(c.mobileLimitKey, mobile)
 		count          int64
 	)
+	ctx := context.Background()
 
-	_, err := c.client().Pipelined(func(pipe redis.Pipeliner) error {
-		count = pipe.Incr(mobileLimitKey).Val()
-		pipe.ExpireAt(mobileLimitKey, deadline)
-		_, e := pipe.Exec()
+	_, err := c.client().Pipelined(ctx, func(pipe redis.Pipeliner) error {
+		count = pipe.Incr(ctx, mobileLimitKey).Val()
+		pipe.ExpireAt(ctx, mobileLimitKey, deadline)
+		_, e := pipe.Exec(ctx)
 		return e
 	})
 	if err != nil {
@@ -122,7 +129,8 @@ func (c *defaultSmsCache) IncrMobileLimit(mobile string) (int, error) {
 
 // GetMobileLimit 获取手机号限制次数
 func (c *defaultSmsCache) GetMobileLimit(mobile string) (int, error) {
-	countStr, err := c.client().Get(fmt.Sprintf(c.mobileLimitKey, mobile)).Result()
+	ctx := context.Background()
+	countStr, err := c.client().Get(ctx, fmt.Sprintf(c.mobileLimitKey, mobile)).Result()
 	if err != nil {
 		return 0, err
 	}
@@ -140,11 +148,12 @@ func (c *defaultSmsCache) IncrIpLimit(ip string) (int, error) {
 		ipLimitKey = fmt.Sprintf(c.ipLimitKey, ip)
 		count      int64
 	)
+	ctx := context.Background()
 
-	_, err := c.client().Pipelined(func(pipe redis.Pipeliner) error {
-		count = pipe.Incr(ipLimitKey).Val()
-		pipe.Expire(ipLimitKey, time.Minute)
-		_, e := pipe.Exec()
+	_, err := c.client().Pipelined(ctx, func(pipe redis.Pipeliner) error {
+		count = pipe.Incr(ctx, ipLimitKey).Val()
+		pipe.Expire(ctx, ipLimitKey, time.Minute)
+		_, e := pipe.Exec(ctx)
 		return e
 	})
 	if err != nil {
@@ -156,7 +165,8 @@ func (c *defaultSmsCache) IncrIpLimit(ip string) (int, error) {
 
 // GetIpLimit 获取IP限制次数
 func (c *defaultSmsCache) GetIpLimit(ip string) (int, error) {
-	countStr, err := c.client().Get(fmt.Sprintf(c.ipLimitKey, ip)).Result()
+	ctx := context.Background()
+	countStr, err := c.client().Get(ctx, fmt.Sprintf(c.ipLimitKey, ip)).Result()
 	if err != nil {
 		return 0, err
 	}

@@ -8,6 +8,7 @@
 package middlewares
 
 import (
+	"errors"
 	"gin_template/app/data_struct"
 	"gin_template/app/enum"
 	"gin_template/app/libs"
@@ -69,22 +70,21 @@ func validateToken(validateType int64) gin.HandlerFunc {
 		}
 
 		if userId, err = auth.GetUidByToken(token); err != nil {
-			if e, ok := err.(*jwt.ValidationError); ok {
-				switch e.Errors {
-				case jwt.ValidationErrorExpired:
-					err = serror.NewErr().SetMsg("授权已过期")
-					libs.Error(ctx, err, http.StatusForbidden)
-					return
-				case jwt.ValidationErrorClaimsInvalid,
-					jwt.ValidationErrorSignatureInvalid,
-					jwt.ValidationErrorNotValidYet,
-					jwt.ValidationErrorId,
-					jwt.ValidationErrorIssuedAt,
-					jwt.ValidationErrorIssuer:
-					err = serror.NewErr().SetMsg("无效授权")
-					libs.Error(ctx, err, http.StatusForbidden)
-					return
-				}
+			switch {
+			case errors.Is(err, jwt.ErrTokenExpired):
+				err = serror.NewErr().SetMsg("授权已过期")
+				libs.Error(ctx, err, http.StatusForbidden)
+				return
+			case errors.Is(err, jwt.ErrTokenNotValidYet),
+				errors.Is(err, jwt.ErrTokenMalformed),
+				errors.Is(err, jwt.ErrTokenSignatureInvalid):
+				err = serror.NewErr().SetMsg("无效授权")
+				libs.Error(ctx, err, http.StatusForbidden)
+				return
+			default:
+				err = serror.NewErr().SetMsg("无效授权")
+				libs.Error(ctx, err, http.StatusForbidden)
+				return
 			}
 		}
 
@@ -122,22 +122,21 @@ func ValidateWsToken(ctx *ws.Context) error {
 
 	userId, err := auth.GetUidByToken(token)
 	if err != nil {
-		if e, ok := err.(*jwt.ValidationError); ok {
-			switch e.Errors {
-			case jwt.ValidationErrorExpired:
-				err = serror.NewErr().SetMsg("授权已过期")
-				libs.Logger.Error(err)
-				return err
-			case jwt.ValidationErrorClaimsInvalid,
-				jwt.ValidationErrorSignatureInvalid,
-				jwt.ValidationErrorNotValidYet,
-				jwt.ValidationErrorId,
-				jwt.ValidationErrorIssuedAt,
-				jwt.ValidationErrorIssuer:
-				err = serror.NewErr().SetMsg("无效授权")
-				libs.Logger.Error(err)
-				return err
-			}
+		switch {
+		case errors.Is(err, jwt.ErrTokenExpired):
+			err = serror.NewErr().SetMsg("授权已过期")
+			libs.Logger.Error(err)
+			return err
+		case errors.Is(err, jwt.ErrTokenNotValidYet),
+			errors.Is(err, jwt.ErrTokenMalformed),
+			errors.Is(err, jwt.ErrTokenSignatureInvalid):
+			err = serror.NewErr().SetMsg("无效授权")
+			libs.Logger.Error(err)
+			return err
+		default:
+			err = serror.NewErr().SetMsg("无效授权")
+			libs.Logger.Error(err)
+			return err
 		}
 	}
 
